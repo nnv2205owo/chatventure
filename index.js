@@ -500,6 +500,57 @@ app.post('/webhook', function (req, res) {
                                         ]
                                     }];
                                     await sendList(senderId, elements);
+                                } else if (['block'].includes(text.toLowerCase())) {
+                                    await blockFunc(senderId, senderData, senderData.data().partner);
+                                } else if (['báo bug', 'báo lỗi', 'baobug', 'baoloi'].includes(text.toLowerCase())) {
+                                    await setDoc(doc(db, "global_vars", "bug"), {
+                                        bugger: arrayUnion(senderId),
+                                    }, {merge: true})
+                                } else if (['resetacc', 'reset acc'].includes(text.toLowerCase())) {
+                                    //Reset acc
+
+                                    let queryHistory = query(collection(db, 'users', senderId, 'history'));
+
+                                    let querySnapshot = await getDocs(queryHistory);
+
+                                    querySnapshot.forEach((gettedDoc) => {
+                                        (async () => {
+                                            await deleteDoc(doc(db, 'users', senderId, 'history', gettedDoc.id));
+                                            await deleteDoc(doc(db, 'users', psid, 'history', gettedDoc.id));
+                                        })();
+                                    });
+
+                                    await deleteDoc(doc(db, 'global_vars', 'masks', 'users', senderData.data().mask_id));
+
+                                    let docRef = await addDoc(collection(db, 'global_vars', 'masks', 'users'), {
+                                        id: senderId
+                                    });
+
+                                    await setDoc(doc(db, 'users', senderId), {
+                                        nickname: 'Ẩn danh',
+                                        gender: profile.gender === undefined ? null : profile.gender,
+                                        fb_link: null,
+                                        history_requesting_id: null,
+                                        last_connect: null,
+                                        id: senderId,
+                                        topic: null,
+                                        partner: null,
+                                        crr_timestamp: null,
+                                        age: null,
+                                        age_range: null,
+                                        tags: [],
+                                        find_tags: [],
+                                        find_gender: null,
+                                        blocked: [],
+                                        queued_timestamp: null,
+                                        answered_questions: [],
+                                        asked_questions: [],
+                                        listen_to_queue: true,
+                                        exclude_last_connected: false,
+                                        mask_id: docRef.id,
+                                        qa_requesting_id: null,
+                                    });
+
                                 } else if (checkIfParameterCmd(text)) {
 
                                     var command = text.substr(0, text.indexOf(' '));
@@ -688,12 +739,6 @@ app.post('/webhook', function (req, res) {
                                             )
                                         }
                                     }
-                                } else if (['block'].includes(text.toLowerCase())) {
-                                    await blockFunc(senderId, senderData, senderData.data().partner);
-                                } else if (['báo bug', 'báo lỗi', 'baobug', 'baoloi'].includes(text.toLowerCase())) {
-                                    await setDoc(doc(db, "global_vars", "bug"), {
-                                        bugger: arrayUnion(senderId),
-                                    }, {merge: true})
                                 } else {
                                     //Tin nhắn thường
 
