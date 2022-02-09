@@ -485,6 +485,8 @@ app.post('/webhook', function (req, res) {
                                         qa_requesting_id: null,
                                     });
 
+                                    await sendQuickReply(senderId, 'Bạn đã reset acc thành công');
+
                                 } else if (checkIfParameterCmd(text)) {
 
                                     var command = text.substr(0, text.indexOf(' '));
@@ -1727,6 +1729,7 @@ async function getOut(senderId, senderData) {
 
         //Nếu đang kết nối
         if (senderData.data().crr_timestamp !== null) {
+            await sendQuickReply(senderId, 'Bạn đã thoát khỏi cuộc trò chuyện với đối tác');
 
             //Hủy kết nối cho partner
             await setDoc(doc(db, 'users', senderData.data().partner), {
@@ -1739,7 +1742,8 @@ async function getOut(senderId, senderData) {
         } else if (senderData.data().listen_to_queue) {
 
             let nickname = senderData.data().nickname;
-            await sendQueueTextMessage(senderId, nickname + ' đã thoát khỏi hàng chờ');
+            await sendQueueTextMessage(senderId, nickname + ' đã thoát khỏi hàng đợi');
+            await sendQuickReply(senderId, 'Bạn đã thoát khỏi cuộc trò chuyện trong hàng đợi');
 
         }
 
@@ -1780,7 +1784,6 @@ async function getOut(senderId, senderData) {
             queue_list: arrayRemove(senderId)
         }, {merge: true});
 
-        await sendQuickReply(senderId, 'Bạn đã thoát');
         return 1;
     } catch (e) {
         // Deal with the fact the chain failed
