@@ -620,7 +620,7 @@ app.post('/webhook', function (req, res) {
 
                                         }, {merge: true});
 
-                                        sendQuickReplyQuestion(senderId, "Câu hỏi của bạn đã được ghi lại");
+                                        await sendQuickReplyQuestion(senderId, "Câu hỏi của bạn đã được ghi lại");
 
                                     } else if (command.toLowerCase() === 'traloi') {
                                         if (senderData.data().crr_question === null) {
@@ -753,7 +753,9 @@ app.post('/webhook', function (req, res) {
                                             let docRef = doc(db, 'global_vars', 'queue');
                                             let docSnap = await getDoc(docRef);
 
-                                            for (let queued_user in docSnap.data().queue_list) {
+                                            for (let queued_user_index in docSnap.data().queue_list) {
+                                                let queued_user = docSnap.data().queue_list[queued_user_index];
+
                                                 let docRefQueueUser = doc(db, 'users', queued_user);
                                                 let docSnapQueueUser = await getDoc(docRefQueueUser);
 
