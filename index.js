@@ -231,79 +231,11 @@ app.post('/webhook', function (req, res) {
                                     await sendList(senderId, elements);
 
                                 } else if (['thoát', 'thoat', 'kết thúc', 'ket thuc', 'ketthuc'].includes(text.toLowerCase())) {
-                                    try {
 
-                                        //Check nếu đang trong hàng đợi hoặc đã kết nối hoặc đang request
-                                        if (senderData.data().queued_timestamp === null
-                                            && senderData.data().crr_timestamp === null
-                                            && senderData.data().history_requesting_id === null
-                                            && senderData.data().qa_requesting_id === null) {
-                                            await sendQuickReply(senderId, 'Không thể thoát khi chưa kết nối hoặc trong hàng đợi');
-                                            return;
-                                        }
+                                    let code = await getOut(senderId, senderData);
+                                    if (code === 0)
+                                        await sendQuickReply(senderId, 'Không thể thoát khi chưa kết nối hoặc trong hàng đợi');
 
-                                        //Nếu đang kết nối
-                                        if (senderData.data().crr_timestamp !== null) {
-
-                                            //Hủy kết nối cho partner
-                                            await setDoc(doc(db, 'users', senderData.data().partner), {
-                                                partner: null,
-                                                crr_timestamp: null,
-                                                find_gender: null,
-                                                queued_timestamp: null,
-                                            }, {merge: true});
-
-                                            await sendQuickReply(senderData.data().partner, 'Người kia đã thoát khỏi cuộc trò chuyện');
-                                        } else if (senderData.data().listen_to_queue) {
-
-                                            let nickname = senderData.data().nickname;
-                                            await sendQueueTextMessage(senderId, nickname + ' đã thoát khỏi hàng chờ');
-
-                                        }
-
-                                        //Nếu đang request
-                                        if (senderData.data().history_requesting_id !== null) {
-
-                                            //Hủy lời mời kết nối cho bản thân
-                                            await setDoc(doc(db, 'users', senderId,
-                                                'history', senderData.data().history_requesting_id.toString()), {
-                                                requested: false
-                                            }, {merge: true});
-
-                                            //Query lấy psid người được request
-                                            let docRef = doc(db, 'users', senderId
-                                                , 'history', senderData.data().history_requesting_id.toString());
-                                            let docSnapHistory = await getDoc(docRef);
-
-                                            //Hủy lời mời cho người được request
-                                            await setDoc(doc(db, 'users', docSnapHistory.data().psid
-                                                , 'history', docSnapHistory.id), {
-                                                requesting: false
-                                            }, {merge: true});
-                                        }
-
-                                        //Reset
-                                        await setDoc(doc(db, 'users', senderId), {
-                                            partner: null,
-                                            // nickname: null,
-                                            history_requesting_id: null,
-                                            crr_timestamp: null,
-                                            find_gender: null,
-                                            queued_timestamp: null,
-                                            qa_requesting_id: null,
-                                        }, {merge: true});
-
-                                        //Xóa queue
-                                        await setDoc(doc(db, 'global_vars', 'queue'), {
-                                            queue_list: arrayRemove(senderId)
-                                        }, {merge: true});
-
-                                        await sendQuickReply(senderId, 'Bạn đã thoát');
-
-                                    } catch (e) {
-                                        // Deal with the fact the chain failed
-                                        // console.log('Exit error:', e);
-                                    }
                                 } else if (['timkiemnangcao', 'tìm kiếm nâng cao', 'tim kiem nang cao', 'advance search', 'advance_search', 'advancesearch']
                                     .includes(text.toLowerCase())) {
                                     let link = 'https://lqdchatventure-web.herokuapp.com/advance_search?id=' + senderData.data().mask_id;
@@ -508,6 +440,8 @@ app.post('/webhook', function (req, res) {
                                     }, {merge: true})
                                 } else if (['resetacc', 'reset acc'].includes(text.toLowerCase())) {
                                     //Reset acc
+
+                                    await getOut();
 
                                     let queryHistory = query(collection(db, 'users', senderId, 'history'));
 
@@ -1777,5 +1711,80 @@ async function blockFunc(senderId, senderData, psid) {
             console.log("Error at blockFunc: ", e);
         }
 
+    }
+}
+
+async function getOut(senderId, senderData) {
+    try {
+
+        //Check nếu đang trong hàng đợi hoặc đã kết nối hoặc đang request
+        if (senderData.data().queued_timestamp === null
+            && senderData.data().crr_timestamp === null
+            && senderData.data().history_requesting_id === null
+            && senderData.data().qa_requesting_id === null) {
+            return 0;
+        }
+
+        //Nếu đang kết nối
+        if (senderData.data().crr_timestamp !== null) {
+
+            //Hủy kết nối cho partner
+            await setDoc(doc(db, 'users', senderData.data().partner), {
+                partner: null,
+                crr_timestamp: null,
+                find_gender: null,
+            }, {merge: true});
+
+            await sendQuickReply(senderData.data().partner, 'Người kia đã thoát khỏi cuộc trò chuyện');
+        } else if (senderData.data().listen_to_queue) {
+
+            let nickname = senderData.data().nickname;
+            await sendQueueTextMessage(senderId, nickname + ' đã thoát khỏi hàng chờ');
+
+        }
+
+        //Nếu đang request
+        if (senderData.data().history_requesting_id !== null) {
+
+            //Hủy lời mời kết nối cho bản thân
+            await setDoc(doc(db, 'users', senderId,
+                'history', senderData.data().history_requesting_id.toString()), {
+                requested: false
+            }, {merge: true});
+
+            //Query lấy psid người được request
+            let docRef = doc(db, 'users', senderId
+                , 'history', senderData.data().history_requesting_id.toString());
+            let docSnapHistory = await getDoc(docRef);
+
+            //Hủy lời mời cho người được request
+            await setDoc(doc(db, 'users', docSnapHistory.data().psid
+                , 'history', docSnapHistory.id), {
+                requesting: false
+            }, {merge: true});
+        }
+
+        //Reset
+        await setDoc(doc(db, 'users', senderId), {
+            partner: null,
+            // nickname: null,
+            history_requesting_id: null,
+            crr_timestamp: null,
+            find_gender: null,
+            queued_timestamp: null,
+            qa_requesting_id: null,
+        }, {merge: true});
+
+        //Xóa queue
+        await setDoc(doc(db, 'global_vars', 'queue'), {
+            queue_list: arrayRemove(senderId)
+        }, {merge: true});
+
+        await sendQuickReply(senderId, 'Bạn đã thoát');
+        return 1;
+    } catch (e) {
+        // Deal with the fact the chain failed
+        console.log('Exit error:', e);
+        return -1;
     }
 }
