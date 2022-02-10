@@ -908,10 +908,9 @@ app.post('/webhook', function (req, res) {
                             else if (payload[0] === 'ACCEPT_REQUEST_PAYLOAD') {
 
                                 //Check nếu trong hàng đợi hoặc đã kết nối
-                                if (senderData.data().crr_timestamp !== null || senderData.data().queued_timestamp !== null
-                                    || senderData.data().qa_requesting_id !== null || senderData.data().history_requesting_id) {
-                                    await bot.sendTextMessage(senderId, 'Bạn phải không đang yêu cầu hoặc kết nối với ai');
-                                } else {
+                                if (senderData.data().crr_timestamp !== null) {
+                                    await bot.sendTextMessage(senderId, ' Bạn phải không trong hàng đợi / yêu cầu ' +
+                                        'kết nối tới người khác. Hãy \'thoat\' trước khi đồng ý kết nối');                                } else {
                                     //Check nếu yêu cầu còn hiệu lực
 
                                     let docRef = doc(db, 'users', psid, 'history', timestamp.toString());
@@ -1110,9 +1109,9 @@ app.post('/webhook', function (req, res) {
                                 if (payload[0] === 'QA_ACCEPT_REQUEST_PAYLOAD') {
 
                                     //Check nếu trong hàng đợi hoặc đã kết nối
-                                    if (senderData.data().crr_timestamp !== null || senderData.data().queued_timestamp !== null
-                                        || senderData.data().qa_requesting_id !== null || senderData.data().history_requesting_id) {
-                                        await bot.sendTextMessage(senderId, 'phải không Bạn');
+                                    if (senderData.data().crr_timestamp !== null) {
+                                        await bot.sendTextMessage(senderId, ' Bạn phải không trong hàng đợi / yêu cầu ' +
+                                            'kết nối tới người khác. Hãy \'thoat\' trước khi đồng ý kết nối');
                                     } else {
                                         //Check nếu yêu cầu còn hiệu lực
 
@@ -1366,7 +1365,6 @@ async function connect(senderId, gettedId) {
     await setDoc(doc(db, 'global_vars', 'queue'), {
         queue_list: arrayRemove(senderId)
     }, {merge: true});
-    // // console.log('Document written');
 
     let docSnapNickname = await getDoc(doc(db, 'users', gettedId));
     await sendQueueTextMessage(gettedId, docSnapNickname.data().nickname + ' đã được kết nối và thoát khỏi phòng đợi');
