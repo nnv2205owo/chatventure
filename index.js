@@ -944,7 +944,7 @@ app.post('/webhook', function (req, res) {
                                 let docRef = doc(db, 'users', senderId, 'history', timestamp.toString());
                                 let docSnap = await getDoc(docRef);
                                 //Nếu yêu cầu đã bị xóa (Người kia từ chối hoặc mình exit hoặc đã remove)
-                                if (docSnap.data().requested === false) {
+                                if (!docSnap.exists() || docSnap.data().requested === false) {
                                     await bot.sendTextMessage(senderId, 'Bạn đã không còn yêu cầu kết nối với người dùng này ' +
                                         'hoặc người yêu cầu đã hủy lời mời');
                                 } else {
@@ -1133,7 +1133,12 @@ app.post('/webhook', function (req, res) {
                                             qa_requesting_id: null,
                                         }, {merge: true});
                                         await bot.sendTextMessage(psid, 'Rejected');
-                                        await bot.sendTextMessage(senderId, 'Alright');
+                                        await bot.sendTextMessage(senderId, 'Yêu cầu kết nối của bạn đã bị từ chối');
+
+                                        await setDoc(doc(db, 'global_vars', 'queue'), {
+                                            queue_list: arrayRemove(psid)
+                                        }, {merge: true});
+
                                     } else {
                                         //Lời mời không còn hiệu lực khi timestamp của người mời đã hủy requested
                                         await bot.sendTextMessage(senderId, 'Người dùng hiện không còn yêu cầu kết nối tới bạn');
@@ -1143,7 +1148,12 @@ app.post('/webhook', function (req, res) {
                                     if (senderData.data().qa_requesting_id === psid) {
                                         await setDoc(doc(db, 'users', senderId), {
                                             qa_requesting_id: null,
+                                        }, {merge: true})
+
+                                        await setDoc(doc(db, 'global_vars', 'queue'), {
+                                            queue_list: arrayRemove(senderId)
                                         }, {merge: true});
+
                                     } else {
                                         //Lời mời không còn hiệu lực khi timestamp của người mời đã hủy requested
                                         await bot.sendTextMessage(senderId, 'Bạn không còn yêu cầu kết nối tới người dùng');
@@ -1351,6 +1361,10 @@ async function connect(senderId, gettedId) {
     //Xóa queue
     await setDoc(doc(db, 'global_vars', 'queue'), {
         queue_list: arrayRemove(gettedId)
+    }, {merge: true});
+
+    await setDoc(doc(db, 'global_vars', 'queue'), {
+        queue_list: arrayRemove(senderId)
     }, {merge: true});
     // // console.log('Document written');
 
