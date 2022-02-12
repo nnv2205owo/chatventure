@@ -1377,12 +1377,11 @@ async function connect(senderId, gettedId) {
 }
 
 async function addToQueue(senderId, senderData) {
-    let docRef = doc(db, 'users', senderId);
-    let docSnap = await getDoc(docRef);
+    senderData = senderData.data();
 
     // Check nếu trong hàng đợi hoặc đã kết nối
-    if (docSnap.data().queued_timestamp !== null || docSnap.data().crr_timestamp !== null
-        || docSnap.data().history_requesting_id !== null || docSnap.data().qa_requesting_id !== null) {
+    if (senderData.queued_timestamp !== null || senderData.crr_timestamp !== null
+        || senderData.history_requesting_id !== null || senderData.qa_requesting_id !== null) {
         await bot.sendTextMessage(senderId, 'Bạn phải không kết nối hoặc đang yêu cầu / trong hàng đợi với ai');
         return;
     }
