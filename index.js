@@ -652,12 +652,8 @@ app.post('/webhook', function (req, res) {
                                                 answers_count: docSnapQuestions.data().answers_count + 1
                                             }, {merge: true});
 
-                                            let answered_questions = senderData.data().answered_questions;
-                                            answered_questions.push(senderData.data().crr_question);
-
                                             await setDoc(doc(db, 'users', senderId), {
-                                                answered_questions: answered_questions,
-                                                timestamp: Date.now(),
+                                                answered_questions: arrayUnion(senderData.data().crr_question),
                                                 crr_question: null
                                             }, {merge: true});
 
