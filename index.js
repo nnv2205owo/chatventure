@@ -198,8 +198,13 @@ app.post('/webhook', function (req, res) {
 
                             // Nếu người dùng gửi tin nhắn đến
                             if (message.message.text) {
+
                                 var text = message.message.text;
                                 // // console.log(senderId, text);
+
+                                await setDoc(doc(db, 'users', senderId), {
+                                    last_text: text,
+                                }, {merge: true});
 
                                 if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem'].includes(text.toLowerCase())) {
                                     try {
@@ -403,9 +408,11 @@ app.post('/webhook', function (req, res) {
                                 } else if (['tìm câu hỏi', 'tim cau hoi', 'timcauhoi'].includes(text.toLowerCase())) {
 
                                     let docSnap = await getDoc(doc(db, 'global_vars', 'qa'));
-                                    let questIdList = []
+                                    let questIdList = [];
                                     for (let i = 0; i < docSnap.data().questions_count; i++) {
-                                        if (senderData.data().answered_questions.includes(i) || senderData.data().asked_questions.includes(i)) continue;
+
+                                        if (senderData.data().answered_questions.includes(i)) continue;
+
                                         questIdList.push(i);
                                     }
                                     if (questIdList === []) {
@@ -1260,11 +1267,11 @@ function getTextbyMID(mid) {
 function getProfile(id) {
     return new Promise(function (resolve, reject) {
         request({
-            url: 'https://graph.facebook.com/v12.0/' + id + '?fields=name,gender',
+            url: 'https://graph.facebook.com/v12.0/' + id + '?fields=gender',
             qs: {
                 access_token: FB_pageToken,
             },
-            method: 'GET',
+            method: 'POST',
         }, function (err, res, body) {
             if (err) {
                 // console.log(err);
