@@ -134,7 +134,7 @@ app.post('/webhook', function (req, res) {
                         let senderId = message.sender.id;
 
                         // // console.log('Async');
-                        var senderData = (await getDoc(doc(db, 'users', senderId))).data();
+                        var senderData = await getDoc(doc(db, 'users', senderId));
                         var command_text = true;
 
                         if (message.message || message.postback || message.reaction) {
@@ -191,7 +191,7 @@ app.post('/webhook', function (req, res) {
                                     });
 
                                 }).catch((err) => console.log(err));
-                                senderData = (await getDoc(doc(db, 'users', senderId))).data();
+                                senderData = await getDoc(doc(db, 'users', senderId));
                             }
                         }
                         if (message.message) {
@@ -203,7 +203,7 @@ app.post('/webhook', function (req, res) {
 
                                 if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem'].includes(text.toLowerCase())) {
                                     try {
-                                        await addToQueue(senderId, senderData);
+                                        await addToQueue(senderId);
                                     } catch
                                         (e) {
                                         // Deal with the fact the chain failed
@@ -212,7 +212,7 @@ app.post('/webhook', function (req, res) {
 
                                 } else if (['profile', 'thông tin', 'hồ sơ', 'thong tin', 'ho so', 'thongtin', 'hoso'].includes(text.toLowerCase())) {
 
-                                    let link = 'https://lqdchatventure-web.herokuapp.com/profile?id=' + senderData.mask_id;
+                                    let link = 'https://lqdchatventure-web.herokuapp.com/profile?id=' + senderData.data().mask_id;
                                     let elements = [{
                                         'title': 'Profile của bạn',
                                         'default_action': {
@@ -238,7 +238,7 @@ app.post('/webhook', function (req, res) {
 
                                 } else if (['timkiemnangcao', 'tìm kiếm nâng cao', 'tim kiem nang cao', 'advance search', 'advance_search', 'advancesearch']
                                     .includes(text.toLowerCase())) {
-                                    let link = 'https://lqdchatventure-web.herokuapp.com/advance_search?id=' + senderData.mask_id;
+                                    let link = 'https://lqdchatventure-web.herokuapp.com/advance_search?id=' + senderData.data().mask_id;
                                     let elements = [{
                                         'title': 'Sửa đổi các thiết lập tìm kiếm nâng cao',
                                         'default_action': {
@@ -297,7 +297,7 @@ app.post('/webhook', function (req, res) {
                                             }
                                         ]
 
-                                        if (i === querySnapshot.size && senderData.crr_timestamp !== null) {
+                                        if (i === querySnapshot.size && senderData.data().crr_timestamp !== null) {
                                             command_buttons = [
                                                 {
                                                     'type': 'postback',
@@ -385,8 +385,7 @@ app.post('/webhook', function (req, res) {
                                         find_gender: 'male',
 
                                     }, {merge: true});
-                                    await addToQueue(senderId, senderData);
-
+                                    await addToQueue(senderId);
 
                                 } else if (['tìm nữ', 'tim nu', 'timnu'].includes(text.toLowerCase())) {
                                     await setDoc(doc(db, 'users', senderId), {
@@ -394,8 +393,7 @@ app.post('/webhook', function (req, res) {
                                         find_gender: 'female',
 
                                     }, {merge: true});
-                                    await addToQueue(senderId, senderData);
-
+                                    await addToQueue(senderId);
 
                                 } else if (['trợ giúp', 'tro giup', 'trogiup', 'help'].includes(text.toLowerCase())) {
                                     for (let help in help_list) {
@@ -417,7 +415,7 @@ app.post('/webhook', function (req, res) {
                                     await sendQuickReply(senderId, 'Câu hỏi : ' + docSnap.data().text);
 
                                 } else if (['câu hỏi của tôi', 'cau hoi cua toi', 'cauhoicuatoi'].includes(text.toLowerCase())) {
-                                    let link = 'https://lqdchatventure-web.herokuapp.com/quest?id=' + senderData.mask_id;
+                                    let link = 'https://lqdchatventure-web.herokuapp.com/quest?id=' + senderData.data().mask_id;
                                     let elements = [{
                                         'title': 'Các câu hỏi bạn đã đặt',
                                         'default_action': {
@@ -435,10 +433,10 @@ app.post('/webhook', function (req, res) {
                                     }];
                                     await sendList(senderId, elements);
                                 } else if (['câu hỏi hiện tại', 'cau hoi hien tai', 'cauhoihientai'].includes(text.toLowerCase())) {
-                                    let questData = await getDoc(doc(db, 'questions', senderData.crr_question.toString()))
-                                    bot.sendTextMessage(senderId, questData.data().text)
+                                    let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question))
+                                    bot.sendTextMessage(senderId)
                                 } else if (['block'].includes(text.toLowerCase())) {
-                                    await blockFunc(senderId, senderData, senderData.partner);
+                                    await blockFunc(senderId, senderData, senderData.data().partner);
                                 } else if (['báo bug', 'báo lỗi', 'baobug', 'baoloi'].includes(text.toLowerCase())) {
                                     await setDoc(doc(db, "global_vars", "bug"), {
                                         bugger: arrayUnion(senderId),
@@ -459,7 +457,7 @@ app.post('/webhook', function (req, res) {
                                         })();
                                     });
 
-                                    await deleteDoc(doc(db, 'global_vars', 'masks', 'users', senderData.mask_id));
+                                    await deleteDoc(doc(db, 'global_vars', 'masks', 'users', senderData.data().mask_id));
 
                                     let docRef = await addDoc(collection(db, 'global_vars', 'masks', 'users'), {
                                         id: senderId
@@ -530,9 +528,9 @@ app.post('/webhook', function (req, res) {
 
                                         await sendQuickReply(senderId, 'Nickname của bạn đã được đặt là ' + parameter);
 
-                                        if (senderData.crr_timestamp !== null) {
-                                            await setDoc(doc(db, 'users', senderData.partner,
-                                                'history', senderData.crr_timestamp.toString()), {
+                                        if (senderData.data().crr_timestamp !== null) {
+                                            await setDoc(doc(db, 'users', senderData.data().partner,
+                                                'history', senderData.data().crr_timestamp.toString()), {
 
                                                 nickname: parameter,
 
@@ -562,11 +560,11 @@ app.post('/webhook', function (req, res) {
 
                                     } else if (command.toLowerCase() === 'datnickname') {
 
-                                        if (senderData.crr_timestamp === null) {
+                                        if (senderData.data().crr_timestamp === null) {
                                             await sendQuickReply(senderId, 'Bạn chưa kết nối với ai');
                                         } else {
                                             await setDoc(doc(db, 'users', senderId,
-                                                'history', senderData.crr_timestamp.toString()), {
+                                                'history', senderData.data().crr_timestamp.toString()), {
 
                                                 set_nickname: parameter,
 
@@ -592,7 +590,7 @@ app.post('/webhook', function (req, res) {
                                             text: parameter,
                                             answers_count: 0,
                                             timestamp: Date.now(),
-                                            author: senderData.nickname,
+                                            author: senderData.data().nickname,
                                             author_id: senderId,
                                             mask_id: docRef.id
 
@@ -615,25 +613,25 @@ app.post('/webhook', function (req, res) {
                                         await sendQuickReplyQuestion(senderId, "Câu hỏi của bạn đã được ghi lại");
 
                                     } else if (command.toLowerCase() === 'traloi') {
-                                        if (senderData.crr_question === null) {
+                                        if (senderData.data().crr_question === null) {
                                             await sendQuickReplyQuestion(senderId, 'Bạn chưa chọn câu hỏi');
                                         } else {
-                                            let docSnapQuestions = await getDoc(doc(db, 'questions', senderData.crr_question.toString()));
+                                            let docSnapQuestions = await getDoc(doc(db, 'questions', senderData.data().crr_question.toString()));
 
-                                            await setDoc(doc(db, 'questions', senderData.crr_question.toString(),
+                                            await setDoc(doc(db, 'questions', senderData.data().crr_question.toString(),
                                                 'answers', (docSnapQuestions.data().answers_count).toString()), {
                                                 text: parameter,
                                                 timestamp: Date.now(),
-                                                author: senderData.nickname,
+                                                author: senderData.data().nickname,
                                                 author_id: senderId,
                                             }, {merge: true});
 
-                                            await setDoc(doc(db, 'questions', senderData.crr_question.toString()), {
+                                            await setDoc(doc(db, 'questions', senderData.data().crr_question.toString()), {
                                                 answers_count: docSnapQuestions.data().answers_count + 1
                                             }, {merge: true});
 
-                                            let answered_questions = senderData.answered_questions;
-                                            answered_questions.push(senderData.crr_question);
+                                            let answered_questions = senderData.data().answered_questions;
+                                            answered_questions.push(senderData.data().crr_question);
 
                                             await setDoc(doc(db, 'users', senderId), {
                                                 answered_questions: answered_questions,
@@ -642,7 +640,7 @@ app.post('/webhook', function (req, res) {
                                             }, {merge: true});
 
                                             let link = 'https://lqdchatventure-web.herokuapp.com/ans?id=' + docSnapQuestions.data().mask_id +
-                                                '&senderId=' + senderData.mask_id;
+                                                '&senderId=' + senderData.data().mask_id;
 
                                             let elements = [{
                                                 'title': 'Câu hỏi của bạn đã được ghi lại',
@@ -683,14 +681,14 @@ app.post('/webhook', function (req, res) {
                                 } else {
                                     //Tin nhắn thường
 
-                                    if (senderData.crr_timestamp !== null) {
+                                    if (senderData.data().crr_timestamp !== null) {
                                         command_text = false;
-                                        await bot.sendTextMessage(senderData.partner, text);
+                                        await bot.sendTextMessage(senderData.data().partner, text);
 
-                                    } else if (senderData.listen_to_queue === true &&
-                                        (senderData.queued_timestamp !== null
-                                            || senderData.history_requesting_id !== null
-                                            || senderData.qa_requesting_id !== null)) {
+                                    } else if (senderData.data().listen_to_queue === true &&
+                                        (senderData.data().queued_timestamp !== null
+                                            || senderData.data().history_requesting_id !== null
+                                            || senderData.data().qa_requesting_id !== null)) {
 
                                         command_text = false;
 
@@ -704,10 +702,10 @@ app.post('/webhook', function (req, res) {
                             } else {
                                 //Attachments
 
-                                if (senderData.crr_timestamp === null
-                                    && senderData.history_requesting_id === null
-                                    && senderData.queued_timestamp === null
-                                    && senderData.qa_requesting_id === null) {
+                                if (senderData.data().crr_timestamp === null
+                                    && senderData.data().history_requesting_id === null
+                                    && senderData.data().queued_timestamp === null
+                                    && senderData.data().qa_requesting_id === null) {
 
                                     await sendQuickReply(senderId, 'Bạn đang không kết nối với ai cả');
 
@@ -717,22 +715,22 @@ app.post('/webhook', function (req, res) {
                                         var type = attachments.type;
                                         var payload = attachments.payload.url;
 
-                                        if (senderData.crr_timestamp !== null) {
+                                        if (senderData.data().crr_timestamp !== null) {
                                             command_text = false;
 
                                             if (type === 'image') {
-                                                await bot.sendImageMessage(senderData.partner, payload)
+                                                await bot.sendImageMessage(senderData.data().partner, payload)
                                             } else if (type === 'audio') {
-                                                await bot.sendAudioMessage(senderData.partner, payload)
+                                                await bot.sendAudioMessage(senderData.data().partner, payload)
                                             } else if (type === 'video') {
-                                                await bot.sendVideoMessage(senderData.partner, payload)
+                                                await bot.sendVideoMessage(senderData.data().partner, payload)
                                             } else if (type === 'file') {
-                                                await bot.sendFileMessage(senderData.partner, payload)
+                                                await bot.sendFileMessage(senderData.data().partner, payload)
                                             }
-                                        } else if (senderData.listen_to_queue === true &&
-                                            (senderData.queued_timestamp !== null
-                                                || senderData.history_requesting_id !== null
-                                                || senderData.qa_requesting_id !== null)) {
+                                        } else if (senderData.data().listen_to_queue === true &&
+                                            (senderData.data().queued_timestamp !== null
+                                                || senderData.data().history_requesting_id !== null
+                                                || senderData.data().qa_requesting_id !== null)) {
 
                                             command_text = false;
 
@@ -749,16 +747,16 @@ app.post('/webhook', function (req, res) {
                                                     && queued_user !== senderId) {
 
                                                     if (type === 'image') {
-                                                        await bot.sendTextMessage(queued_user, senderData.nickname + " đã gửi 1 ảnh");
+                                                        await bot.sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 ảnh");
                                                         await bot.sendImageMessage(queued_user, payload);
                                                     } else if (type === 'audio') {
-                                                        await bot.sendTextMessage(queued_user, senderData.nickname + " đã gửi 1 đoạn âm thanh");
+                                                        await bot.sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 đoạn âm thanh");
                                                         await bot.sendAudioMessage(queued_user, payload);
                                                     } else if (type === 'video') {
-                                                        await bot.sendTextMessage(queued_user, senderData.nickname + " đã gửi 1 video");
+                                                        await bot.sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 video");
                                                         await bot.sendVideoMessage(queued_user, payload);
                                                     } else if (type === 'file') {
-                                                        await bot.sendTextMessage(queued_user, senderData.nickname + " đã gửi 1 file");
+                                                        await bot.sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 file");
                                                         await bot.sendFileMessage(queued_user, payload);
                                                     }
                                                 }
@@ -778,10 +776,10 @@ app.post('/webhook', function (req, res) {
                             //Payload yêu cầu kết nối
                             if (payload[0] === 'CONNECT_REQUEST_PAYLOAD') {
                                 //Check nếu đang trong hàng đợi hoặc đã kết nối
-                                if (senderData.crr_timestamp !== null
-                                    || senderData.queued_timestamp !== null
-                                    || senderData.history_requesting_id !== null
-                                    || senderData.qa_requesting_id !== null) {
+                                if (senderData.data().crr_timestamp !== null
+                                    || senderData.data().queued_timestamp !== null
+                                    || senderData.data().history_requesting_id !== null
+                                    || senderData.data().qa_requesting_id !== null) {
                                     await bot.sendTextMessage(senderId, 'Bạn phải không đang yêu cầu hoặc kết nối với ai. Hãy nhập lệnh thoát trước khi ' +
                                         'gửi yêu cầu kết nối');
                                 } else {
@@ -830,7 +828,7 @@ app.post('/webhook', function (req, res) {
 
                                         }, {merge: true});
 
-                                        await sendQueueTextMessage(senderId, senderData.nickname + ' đã tham gia phòng đợi');
+                                        await sendQueueTextMessage(senderId, senderData.data().nickname + ' đã tham gia phòng đợi');
 
                                         await bot.sendTextMessage(senderId, 'Đã gửi yêu cầu kết nối cho ' +
                                             'người dùng lúc ' + timeConverter(timestamp));
@@ -913,7 +911,7 @@ app.post('/webhook', function (req, res) {
                             else if (payload[0] === 'ACCEPT_REQUEST_PAYLOAD') {
 
                                 //Check nếu trong hàng đợi hoặc đã kết nối
-                                if (senderData.crr_timestamp !== null) {
+                                if (senderData.data().crr_timestamp !== null) {
                                     await bot.sendTextMessage(senderId, ' Bạn phải không trong hàng đợi / yêu cầu ' +
                                         'kết nối tới người khác. Hãy \'thoat\' trước khi đồng ý kết nối');
                                 } else {
@@ -975,7 +973,7 @@ app.post('/webhook', function (req, res) {
 
                                     }, {merge: true});
 
-                                    await sendQueueTextMessage(senderId, senderData.nickname + ' đã thoát khỏi phòng đợi');
+                                    await sendQueueTextMessage(senderId, senderData.data().nickname + ' đã thoát khỏi phòng đợi');
 
                                     //Xóa requesting bên kia timestamp
                                     await setDoc(doc(db, 'users', psid, 'history', timestamp.toString()), {
@@ -1041,18 +1039,18 @@ app.post('/webhook', function (req, res) {
                             //Payload yêu cầu trao đổi in4
                             else if (payload[0] === 'POST_INFO_PAYLOAD') {
 
-                                if (senderData.crr_timestamp === timestamp) {
+                                if (senderData.data().crr_timestamp === timestamp) {
 
-                                    if (senderData.fb_link === null) {
+                                    if (senderData.data().fb_link === null) {
                                         await bot.sendTextMessage(senderId, 'Bạn chưa thiết lập tài khoản FB')
                                     } else {
                                         await setDoc(doc(db, 'users', psid,
-                                            'history', senderData.crr_timestamp.toString()), {
-                                            fb_link: senderData.fb_link
+                                            'history', senderData.data().crr_timestamp.toString()), {
+                                            fb_link: senderData.data().fb_link
                                         }, {merge: true});
 
                                         await bot.sendTextMessage(senderId, 'Đã gửi');
-                                        await bot.sendTextMessage(psid, 'Đã nhận ' + senderData.fb_link);
+                                        await bot.sendTextMessage(psid, 'Đã nhận ' + senderData.data().fb_link);
                                     }
                                 } else {
                                     await bot.sendTextMessage(senderId, 'Bạn không còn kết nối với người này')
@@ -1078,7 +1076,7 @@ app.post('/webhook', function (req, res) {
                                     });
 
                                     //Nếu đang kết nối
-                                    if (senderData.partner === psid) {
+                                    if (senderData.data().partner === psid) {
                                         //Hủy kết nối cho partner
                                         await setDoc(doc(db, 'users', psid), {
                                             partner: null,
@@ -1115,7 +1113,7 @@ app.post('/webhook', function (req, res) {
                                 if (payload[0] === 'QA_ACCEPT_REQUEST_PAYLOAD') {
 
                                     //Check nếu trong hàng đợi hoặc đã kết nối
-                                    if (senderData.crr_timestamp !== null) {
+                                    if (senderData.data().crr_timestamp !== null) {
                                         await bot.sendTextMessage(senderId, ' Bạn phải không trong hàng đợi / yêu cầu ' +
                                             'kết nối tới người khác. Hãy \'thoat\' trước khi đồng ý kết nối');
                                     } else {
@@ -1150,7 +1148,7 @@ app.post('/webhook', function (req, res) {
                                     }
                                 } else if (payload[0] === 'QA_REMOVE_REQUEST_PAYLOAD') {
 
-                                    if (senderData.qa_requesting_id === psid) {
+                                    if (senderData.data().qa_requesting_id === psid) {
                                         await setDoc(doc(db, 'users', senderId), {
                                             qa_requesting_id: null,
                                         }, {merge: true})
@@ -1171,11 +1169,11 @@ app.post('/webhook', function (req, res) {
 
                             let react = message.reaction;
                             if (react.action === 'react')
-                                await bot.sendTextMessage(senderData.partner, 'Đã thả react ' + react.emoji);
+                                await bot.sendTextMessage(senderData.data().partner, 'Đã thả react ' + react.emoji);
                             else
-                                await bot.sendTextMessage(senderData.partner, 'Đã xóa react');
+                                await bot.sendTextMessage(senderData.data().partner, 'Đã xóa react');
 
-                            // if (senderData.crr_timestamp !== null) {
+                            // if (senderData.data().crr_timestamp !== null) {
                             //     let react = message.reaction;
                             //     getTextbyMID(react.mid).then(function (message) {
                             //             var textMID = message
@@ -1188,10 +1186,10 @@ app.post('/webhook', function (req, res) {
                             //                 reactMessage = 'Đã xóa react tin nhắn : \n\n' +
                             //                     textMID;
                             //
-                            //             // console.log(senderData.partner, reactMessage);
+                            //             // console.log(senderData.data().partner, reactMessage);
                             //
                             //             (async () => {
-                            //                 await bot.sendTextMessage(senderData.partner, reactMessage);
+                            //                 await bot.sendTextMessage(senderData.data().partner, reactMessage);
                             //             })();
                             //
                             //         }
@@ -1378,7 +1376,7 @@ async function connect(senderId, gettedId) {
     await bot.sendTextMessage(senderId, 'Bạn đã được kết nối. Nói lời chào với bạn mới đi nào');
 }
 
-async function addToQueue(senderId, senderData) {
+async function addToQueue(senderId) {
     let docRef = doc(db, 'users', senderId);
     let docSnap = await getDoc(docRef);
     // Check nếu trong hàng đợi hoặc đã kết nối
@@ -1387,6 +1385,9 @@ async function addToQueue(senderId, senderData) {
         await bot.sendTextMessage(senderId, 'Bạn phải không kết nối hoặc đang yêu cầu / trong hàng đợi với ai');
         return;
     }
+
+    let docSnapSender = await getDoc(doc(db, 'users', senderId));
+    let senderData = docSnapSender.data();
 
     //Query cho người đang trong queued
     var queryForQueued = query(collection(db, 'users')
@@ -1498,8 +1499,8 @@ async function sendQueueTextMessage(senderId, text) {
     let docSnap = await getDoc(docRef);
 
     docRef = doc(db, 'users', senderId);
-    let senderData = (await getDoc(docRef)).data();
-    let nickname = senderData.nickname;
+    let senderData = await getDoc(docRef);
+    let nickname = senderData.data().nickname;
 
     for (let queued_user_index in docSnap.data().queue_list) {
         let queued_user = docSnap.data().queue_list[queued_user_index];
@@ -1687,7 +1688,7 @@ async function sendQuickReplyQueue(senderId, text, queue) {
 
 async function blockFunc(senderId, senderData, psid) {
 
-    let blocked = senderData.blocked;
+    let blocked = senderData.data().blocked;
     if (blocked.includes(psid)) {
         await sendQuickReply(senderId, 'Bạn đã block người này sẵn từ trước');
     } else {
@@ -1710,7 +1711,7 @@ async function blockFunc(senderId, senderData, psid) {
         });
 
         //Nếu đang kết nối
-        if (senderData.partner === psid) {
+        if (senderData.data().partner === psid) {
             //Hủy kết nối cho partner
             await setDoc(doc(db, 'users', psid), {
                 partner: null,
@@ -1740,45 +1741,45 @@ async function getOut(senderId, senderData) {
     try {
 
         //Check nếu đang trong hàng đợi hoặc đã kết nối hoặc đang request
-        if (senderData.queued_timestamp === null
-            && senderData.crr_timestamp === null
-            && senderData.history_requesting_id === null
-            && senderData.qa_requesting_id === null) {
+        if (senderData.data().queued_timestamp === null
+            && senderData.data().crr_timestamp === null
+            && senderData.data().history_requesting_id === null
+            && senderData.data().qa_requesting_id === null) {
             return 0;
         }
 
         //Nếu đang kết nối
-        if (senderData.crr_timestamp !== null) {
+        if (senderData.data().crr_timestamp !== null) {
             await sendQuickReply(senderId, 'Bạn đã thoát khỏi cuộc trò chuyện với đối tác');
 
             //Hủy kết nối cho partner
-            await setDoc(doc(db, 'users', senderData.partner), {
+            await setDoc(doc(db, 'users', senderData.data().partner), {
                 partner: null,
                 crr_timestamp: null,
                 find_gender: null,
             }, {merge: true});
 
-            await sendQuickReply(senderData.partner, 'Người kia đã thoát khỏi cuộc trò chuyện');
-        } else if (senderData.listen_to_queue) {
+            await sendQuickReply(senderData.data().partner, 'Người kia đã thoát khỏi cuộc trò chuyện');
+        } else if (senderData.data().listen_to_queue) {
 
-            let nickname = senderData.nickname;
+            let nickname = senderData.data().nickname;
             await sendQueueTextMessage(senderId, nickname + ' đã thoát khỏi hàng đợi');
             await sendQuickReply(senderId, 'Bạn đã thoát khỏi cuộc trò chuyện trong hàng đợi');
 
         }
 
         //Nếu đang request
-        if (senderData.history_requesting_id !== null) {
+        if (senderData.data().history_requesting_id !== null) {
 
             //Hủy lời mời kết nối cho bản thân
             await setDoc(doc(db, 'users', senderId,
-                'history', senderData.history_requesting_id.toString()), {
+                'history', senderData.data().history_requesting_id.toString()), {
                 requested: false
             }, {merge: true});
 
             //Query lấy psid người được request
             let docRef = doc(db, 'users', senderId
-                , 'history', senderData.history_requesting_id.toString());
+                , 'history', senderData.data().history_requesting_id.toString());
             let docSnapHistory = await getDoc(docRef);
 
             //Hủy lời mời cho người được request
