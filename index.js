@@ -203,7 +203,7 @@ app.post('/webhook', function (req, res) {
 
                                 if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem'].includes(text.toLowerCase())) {
                                     try {
-                                        await addToQueue(senderId);
+                                        await addToQueue(senderId, senderData);
                                     } catch
                                         (e) {
                                         // Deal with the fact the chain failed
@@ -385,7 +385,7 @@ app.post('/webhook', function (req, res) {
                                         find_gender: 'male',
 
                                     }, {merge: true});
-                                    await addToQueue(senderId);
+                                    await addToQueue(senderId, senderData);
 
                                 } else if (['tìm nữ', 'tim nu', 'timnu'].includes(text.toLowerCase())) {
                                     await setDoc(doc(db, 'users', senderId), {
@@ -393,7 +393,7 @@ app.post('/webhook', function (req, res) {
                                         find_gender: 'female',
 
                                     }, {merge: true});
-                                    await addToQueue(senderId);
+                                    await addToQueue(senderId, senderData);
 
                                 } else if (['trợ giúp', 'tro giup', 'trogiup', 'help'].includes(text.toLowerCase())) {
                                     for (let help in help_list) {
@@ -434,7 +434,7 @@ app.post('/webhook', function (req, res) {
                                     await sendList(senderId, elements);
                                 } else if (['câu hỏi hiện tại', 'cau hoi hien tai', 'cauhoihientai'].includes(text.toLowerCase())) {
                                     let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question))
-                                    bot.sendTextMessage(senderId)
+                                    bot.sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
                                 } else if (['block'].includes(text.toLowerCase())) {
                                     await blockFunc(senderId, senderData, senderData.data().partner);
                                 } else if (['báo bug', 'báo lỗi', 'baobug', 'baoloi'].includes(text.toLowerCase())) {
@@ -1376,18 +1376,16 @@ async function connect(senderId, gettedId) {
     await bot.sendTextMessage(senderId, 'Bạn đã được kết nối. Nói lời chào với bạn mới đi nào');
 }
 
-async function addToQueue(senderId) {
+async function addToQueue(senderId, senderData) {
     let docRef = doc(db, 'users', senderId);
     let docSnap = await getDoc(docRef);
+
     // Check nếu trong hàng đợi hoặc đã kết nối
     if (docSnap.data().queued_timestamp !== null || docSnap.data().crr_timestamp !== null
         || docSnap.data().history_requesting_id !== null || docSnap.data().qa_requesting_id !== null) {
         await bot.sendTextMessage(senderId, 'Bạn phải không kết nối hoặc đang yêu cầu / trong hàng đợi với ai');
         return;
     }
-
-    let docSnapSender = await getDoc(doc(db, 'users', senderId));
-    let senderData = docSnapSender.data();
 
     //Query cho người đang trong queued
     var queryForQueued = query(collection(db, 'users')
