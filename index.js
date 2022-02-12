@@ -402,7 +402,12 @@ app.post('/webhook', function (req, res) {
                                     await sendQuickReply(senderId, "Chào mừng đến với Chatventure");
                                 } else if (['tìm câu hỏi', 'tim cau hoi', 'timcauhoi'].includes(text.toLowerCase())) {
                                     let docSnap = await getDoc(doc(db, 'global_vars', 'qa'));
-                                    let randQuestion = Math.floor(Math.random() * docSnap.data().questions_count);
+                                    let questIdList = []
+                                    for (let i = 0; i < docSnap.data().questions_count; i++) {
+                                        if (senderData.answered_questions.includes(i)) continue;
+                                        questIdList.push(i);
+                                    }
+                                    let randQuestion = Math.floor(Math.random() * questIdList.length);
 
                                     await setDoc(doc(db, 'users', senderId), {
 
@@ -1649,6 +1654,11 @@ async function sendQuickReplyQuestion(senderId, text) {
                     }, {
                         "content_type": "text",
                         "title": "Câu hỏi hiện tại",
+                        "payload": "RANDOM_PAYLOAD",
+                        "image_url": "https://i.pinimg.com/736x/15/8b/ed/158bed9819e4fccf7e18a5eeeaf79c6b.jpg"
+                    }, {
+                        "content_type": "text",
+                        "title": "Câu hỏi của tôi",
                         "payload": "RANDOM_PAYLOAD",
                         "image_url": "https://i.pinimg.com/736x/15/8b/ed/158bed9819e4fccf7e18a5eeeaf79c6b.jpg"
                     },
