@@ -401,23 +401,29 @@ app.post('/webhook', function (req, res) {
                                     }
                                     await sendQuickReply(senderId, "Chào mừng đến với Chatventure");
                                 } else if (['tìm câu hỏi', 'tim cau hoi', 'timcauhoi'].includes(text.toLowerCase())) {
+
                                     let docSnap = await getDoc(doc(db, 'global_vars', 'qa'));
                                     let questIdList = []
                                     for (let i = 0; i < docSnap.data().questions_count; i++) {
-                                        if (senderData.answered_questions.includes(i) || senderData.asked_questions.includes(i)) continue;
+                                        if (senderData.data().answered_questions.includes(i) || senderData.data().asked_questions.includes(i)) continue;
                                         questIdList.push(i);
                                     }
-                                    let randQuestion = Math.floor(Math.random() * questIdList.length);
+                                    if (questIdList === []) {
+                                        bot.sendTextMessage(senderId, "Hiện không còn câu hỏi nào mà bạn chưa trả lời. Hãy đến đây " +
+                                            "vào lúc khác")
+                                    } else {
+                                        let randQuestion = Math.floor(Math.random() * questIdList.length);
 
-                                    await setDoc(doc(db, 'users', senderId), {
+                                        await setDoc(doc(db, 'users', senderId), {
 
-                                        crr_question: randQuestion,
+                                            crr_question: randQuestion,
 
-                                    }, {merge: true});
+                                        }, {merge: true});
 
-                                    docSnap = await getDoc(doc(db, 'questions', randQuestion.toString()));
+                                        docSnap = await getDoc(doc(db, 'questions', randQuestion.toString()));
 
-                                    await sendQuickReply(senderId, 'Câu hỏi : ' + docSnap.data().text);
+                                        await sendQuickReply(senderId, 'Câu hỏi : ' + docSnap.data().text);
+                                    }
 
                                 } else if (['câu hỏi của tôi', 'cau hoi cua toi', 'cauhoicuatoi'].includes(text.toLowerCase())) {
                                     let link = 'https://lqdchatventure-web.herokuapp.com/quest?id=' + senderData.data().mask_id;
