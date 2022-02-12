@@ -404,7 +404,7 @@ app.post('/webhook', function (req, res) {
                                     let docSnap = await getDoc(doc(db, 'global_vars', 'qa'));
                                     let questIdList = []
                                     for (let i = 0; i < docSnap.data().questions_count; i++) {
-                                        if (senderData.answered_questions.includes(i)) continue;
+                                        if (senderData.answered_questions.includes(i) || senderData.asked_questions.includes(i)) continue;
                                         questIdList.push(i);
                                     }
                                     let randQuestion = Math.floor(Math.random() * questIdList.length);
