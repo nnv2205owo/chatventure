@@ -331,7 +331,7 @@ app.post('/webhook', function (req, res) {
                                                 command_buttons = [
                                                     {
                                                         'type': 'postback',
-                                                        'title': 'Gửi lời mởi kết nối',
+                                                        'title': 'Gửi lời mời kết nối',
                                                         'payload': 'CONNECT_REQUEST_PAYLOAD ' + gettedDoc.id + ' ' + data.psid
                                                     }
                                                 ]
@@ -433,8 +433,12 @@ app.post('/webhook', function (req, res) {
                                     }];
                                     await sendList(senderId, elements);
                                 } else if (['câu hỏi hiện tại', 'cau hoi hien tai', 'cauhoihientai'].includes(text.toLowerCase())) {
-                                    let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question.toString()))
-                                    bot.sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
+                                    if (senderData.data().crr_question === null) {
+                                        await sendQuickReplyQuestion(senderId, 'Bạn chưa tìm kiếm câu hỏi nào cả');
+                                    } else {
+                                        let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question.toString()))
+                                        bot.sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
+                                    }
                                 } else if (['block'].includes(text.toLowerCase())) {
                                     await blockFunc(senderId, senderData, senderData.data().partner);
                                 } else if (['báo bug', 'báo lỗi', 'baobug', 'baoloi'].includes(text.toLowerCase())) {
@@ -614,7 +618,7 @@ app.post('/webhook', function (req, res) {
 
                                     } else if (command.toLowerCase() === 'traloi') {
                                         if (senderData.data().crr_question === null) {
-                                            await sendQuickReplyQuestion(senderId, 'Bạn chưa chọn câu hỏi');
+                                            await sendQuickReplyQuestion(senderId, 'Bạn chưa tìm kiếm câu hỏi nào cả');
                                         } else {
                                             let docSnapQuestions = await getDoc(doc(db, 'questions', senderData.data().crr_question.toString()));
 
@@ -1321,8 +1325,6 @@ async function connect(senderId, gettedId) {
     let docRef = doc(db, 'users', gettedId);
     let docSnap = await getDoc(docRef);
 
-    await bot.sendTextMessage(gettedId, 'Bạn đã được kết nối. Nói lời chào với bạn mới đi nào');
-
     await setDoc(doc(db, 'users', senderId, 'history', timestamp.toString()), {
         timestamp: timestamp,
         psid: gettedId,
@@ -1371,9 +1373,11 @@ async function connect(senderId, gettedId) {
     }, {merge: true});
 
     let docSnapNickname = await getDoc(doc(db, 'users', gettedId));
-    await sendQueueTextMessage(gettedId, docSnapNickname.data().nickname + ' đã được kết nối và thoát khỏi phòng đợi');
 
-    await bot.sendTextMessage(senderId, 'Bạn đã được kết nối. Nói lời chào với bạn mới đi nào');
+    await sendQueueTextMessage(gettedId, docSnapNickname.data().nickname + ' đã được kết nối và thoát khỏi phòng đợi');
+    await bot.sendTextMessage(senderId, 'Bạn đã được kết nối. Nói lời chào với người bạn mới đi nào');
+    await bot.sendTextMessage(gettedId, 'Bạn đã được kết nối. Nói lời chào với người bạn mới đi nào');
+
 }
 
 async function addToQueue(senderId, senderData) {
