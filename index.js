@@ -433,7 +433,7 @@ app.post('/webhook', function (req, res) {
                                     }];
                                     await sendList(senderId, elements);
                                 } else if (['câu hỏi hiện tại', 'cau hoi hien tai', 'cauhoihientai'].includes(text.toLowerCase())) {
-                                    let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question))
+                                    let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question.toString()))
                                     bot.sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
                                 } else if (['block'].includes(text.toLowerCase())) {
                                     await blockFunc(senderId, senderData, senderData.data().partner);
