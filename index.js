@@ -114,7 +114,7 @@ app.get('/', (req, res) => {
 
 //Validation token facebook webhook
 app.get('/webhook', function (req, res) {
-    if (req.query['hub.verify_token'] === 'idklol') {
+    if (req.query['hub.verify_token'] === FB_validationToken) {
         res.send(req.query['hub.challenge']);
     }
     res.send('Error, wrong validation token');
@@ -446,6 +446,24 @@ app.post('/webhook', function (req, res) {
                                                 'type': 'web_url',
                                                 'url': link,
                                                 'title': 'Câu hỏi của bạn'
+                                            }
+                                        ]
+                                    }];
+                                    await sendList(senderId, elements);
+                                } else if (['câu hỏi đã trả lời', 'cau hoi đã trả lời', 'cauhoidatraloi', 'datraloi', 'đã trả lời', 'da tra loi'].includes(text.toLowerCase())) {
+                                    let link = 'https://lqdchatventure-web.herokuapp.com/answered?id=' + senderData.data().mask_id;
+                                    let elements = [{
+                                        'title': 'Các câu hỏi bạn đã trả lời',
+                                        'default_action': {
+                                            'type': 'web_url',
+                                            'url': link,
+                                            'webview_height_ratio': 'full',
+                                        },
+                                        'buttons': [
+                                            {
+                                                'type': 'web_url',
+                                                'url': link,
+                                                'title': 'Câu hỏi bạn đã trả lời'
                                             }
                                         ]
                                     }];
