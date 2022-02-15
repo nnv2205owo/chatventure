@@ -631,7 +631,7 @@ app.post('/webhook', function (req, res) {
 
                                         // // console.log('Quests count : ', docSnap.data().questions_count)
 
-                                        await addDoc(doc(db, 'questions'), {
+                                        await addDoc(collection(db, 'questions'), {
 
                                             text: parameter,
                                             answers_count: 0,
