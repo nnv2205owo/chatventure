@@ -411,11 +411,13 @@ app.post('/webhook', function (req, res) {
                                     let docSnap = await getDoc(doc(db, 'global_vars', 'qa'));
                                     let questIdList = [];
                                     for (let i = 0; i < docSnap.data().questions_count; i++) {
+                                        // console.log(i, questIdList)
 
                                         if (senderData.data().answered_questions.includes(i)) continue;
 
                                         questIdList.push(i);
                                     }
+
                                     if (questIdList === []) {
                                         bot.sendTextMessage(senderId, "Hiện không còn câu hỏi nào mà bạn chưa trả lời. Hãy đến đây " +
                                             "vào lúc khác")
@@ -430,12 +432,12 @@ app.post('/webhook', function (req, res) {
 
 
                                         let querySnapshot = await getDocs(query(collection(db, 'questions'),
-                                            where('id', '==', randQuestion.toString())));
+                                            where('id', '==', randQuestion)));
 
                                         querySnapshot.forEach((doc) => {
                                             (async () => {
                                                 // doc.data() is never undefined for query doc snapshots
-                                                console.log(doc.id, " => ", doc.data());
+                                                // console.log(doc.id, " => ", doc.data());
 
                                                 await sendQuickReply(senderId, 'Câu hỏi : ' + doc.data().text);
                                             })();
