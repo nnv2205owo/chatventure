@@ -426,7 +426,7 @@ app.post('/webhook', function (req, res) {
 
 
                                         let querySnapshot = await getDocs(query(collection(db, 'questions'),
-                                            where('id', '==', randQuestion)));
+                                            where('random_id', '==', randQuestion)));
 
                                         querySnapshot.forEach((docSnap) => {
                                             (async () => {
@@ -641,7 +641,7 @@ app.post('/webhook', function (req, res) {
                                             timestamp: Date.now(),
                                             author: senderData.data().nickname,
                                             author_id: senderId,
-                                            id: docSnap.data().questions_count
+                                            random_id: docSnap.data().questions_count
 
                                         });
 
@@ -654,6 +654,35 @@ app.post('/webhook', function (req, res) {
                                         }, {merge: true});
 
                                         await sendQuickReplyQuestion(senderId, "Câu hỏi của bạn đã được ghi lại");
+
+                                    } else if (command.toLowerCase() === '-system-quest') {
+
+                                        // // console.log('Help');
+
+                                        let docSnap = await getDoc(doc(db, 'global_vars', 'qa'));
+
+                                        // // console.log('Quests count : ', docSnap.data().questions_count)
+
+                                        await addDoc(collection(db, 'questions'), {
+
+                                            text: parameter,
+                                            answers_count: 0,
+                                            timestamp: Date.now(),
+                                            author: 'SYSTEM',
+                                            author_id: 'SYSTEM',
+                                            random_id: docSnap.data().questions_count
+
+                                        });
+
+                                        // // console.log('Hye');
+
+                                        await setDoc(doc(db, 'global_vars', 'qa'), {
+
+                                            questions_count: docSnap.data().questions_count + 1,
+
+                                        }, {merge: true});
+
+                                        await bot.sendTextMessage(senderId, "Câu hỏi hệ thống đã được ghi lại");
 
                                     } else if (command.toLowerCase() === 'traloi') {
                                         if (senderData.data().crr_question === null) {
@@ -677,8 +706,8 @@ app.post('/webhook', function (req, res) {
                                                 crr_question: null,
                                             }, {merge: true});
 
-                                            let link = 'https://lqdchatventure-web.herokuapp.com/ans?id=' + docSnapQuestions.id +
-                                                '&senderId=' + senderData.data().mask_id;
+                                            let link = 'https://lqdchatventure-web.herokuapp.com/ans?questId=' + docSnapQuestions.id +
+                                                '&id=' + senderData.data().mask_id;
 
                                             let elements = [{
                                                 'title': 'Câu hỏi của bạn đã được ghi lại',
