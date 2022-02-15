@@ -551,7 +551,7 @@ app.post('/webhook', function (req, res) {
 
                                     // // console.log(command, parameter);
 
-                                    if (command.toLowerCase() === '-global' && (senderId === '4007404939324313' || senderId === '5654724101269283')) {
+                                    if (command.toLowerCase() === '-admin-global' && (senderId === '4007404939324313' || senderId === '5654724101269283')) {
                                         let all = query(collection(db, 'users'));
 
                                         let querySnapshot = await getDocs(all);
@@ -655,7 +655,7 @@ app.post('/webhook', function (req, res) {
 
                                         await sendQuickReplyQuestion(senderId, "Câu hỏi của bạn đã được ghi lại");
 
-                                    } else if (command.toLowerCase() === '-system-quest') {
+                                    } else if (command.toLowerCase() === '-admin-system-quest' && senderId === '4007404939324313') {
 
                                         // // console.log('Help');
 
@@ -1554,7 +1554,7 @@ function checkIfParameterCmd(text) {
         return false;
 
     }
-    return ['-global', 'fblink', 'nickname', 'datnickname', 'cauhoi', 'traloi', 'phongdoi', 'admin', 'ask', 'gioitinh', "admin"]
+    return ['-admin-global', 'fblink', 'nickname', 'datnickname', 'cauhoi', 'traloi', 'phongdoi', 'ask', 'gioitinh', "-admin-system-quest"]
         .includes(command.toLowerCase());
 }
 
