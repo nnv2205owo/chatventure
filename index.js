@@ -424,12 +424,6 @@ app.post('/webhook', function (req, res) {
                                     } else {
                                         let randQuestion = Math.floor(Math.random() * questIdList.length);
 
-                                        await setDoc(doc(db, 'users', senderId), {
-
-                                            crr_question: randQuestion,
-
-                                        }, {merge: true});
-
 
                                         let querySnapshot = await getDocs(query(collection(db, 'questions'),
                                             where('id', '==', randQuestion)));
@@ -440,6 +434,13 @@ app.post('/webhook', function (req, res) {
                                                 // console.log(doc.id, " => ", doc.data());
 
                                                 await sendQuickReply(senderId, 'Câu hỏi : ' + doc.data().text);
+
+                                                await setDoc(doc(db, 'users', senderId), {
+
+                                                    crr_question: doc.id,
+
+                                                }, {merge: true});
+
                                             })();
                                         });
 
