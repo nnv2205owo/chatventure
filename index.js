@@ -480,7 +480,7 @@ app.post('/webhook', function (req, res) {
                                     }];
                                     await sendList(senderId, elements);
                                 } else if (['câu hỏi hiện tại', 'cau hoi hien tai', 'cauhoihientai'].includes(text.toLowerCase())) {
-                                    if (senderData.data().crr_question === null) {
+                                    if (senderData.data().crr_question === null || senderData.data().crr_question === undefined) {
                                         await sendQuickReplyQuestion(senderId, 'Bạn chưa tìm kiếm câu hỏi nào cả');
                                     } else {
                                         let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question))
