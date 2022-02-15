@@ -428,16 +428,16 @@ app.post('/webhook', function (req, res) {
                                         let querySnapshot = await getDocs(query(collection(db, 'questions'),
                                             where('id', '==', randQuestion)));
 
-                                        querySnapshot.forEach((doc) => {
+                                        querySnapshot.forEach((docSnap) => {
                                             (async () => {
                                                 // doc.data() is never undefined for query doc snapshots
                                                 // console.log(doc.id, " => ", doc.data());
 
-                                                await sendQuickReply(senderId, 'Câu hỏi : ' + doc.data().text);
+                                                await sendQuickReply(senderId, 'Câu hỏi : ' + docSnap.data().text);
 
                                                 await setDoc(doc(db, 'users', senderId), {
 
-                                                    crr_question: doc.id,
+                                                    crr_question: docSnap.id,
 
                                                 }, {merge: true});
 
