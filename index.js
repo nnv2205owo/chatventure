@@ -661,13 +661,12 @@ app.post('/webhook', function (req, res) {
                                         } else {
                                             let docSnapQuestions = await getDoc(doc(db, 'questions', senderData.data().crr_question));
 
-                                            await setDoc(doc(db, 'questions', senderData.data().crr_question,
-                                                'answers', (docSnapQuestions.data().answers_count).toString()), {
+                                            await addDoc(collection(db, 'questions', senderData.data().crr_question, 'answers'), {
                                                 text: parameter,
                                                 timestamp: Date.now(),
                                                 author: senderData.data().nickname,
                                                 author_id: senderId,
-                                            }, {merge: true});
+                                            });
 
                                             await setDoc(doc(db, 'questions', senderData.data().crr_question), {
                                                 answers_count: docSnapQuestions.data().answers_count + 1,
@@ -675,7 +674,7 @@ app.post('/webhook', function (req, res) {
                                             }, {merge: true});
 
                                             await setDoc(doc(db, 'users', senderId), {
-                                                answered_questions: arrayUnion(senderData.data().crr_question),
+                                                answered_questions: arrayUnion(senderData.data().id),
                                                 crr_question: null,
                                             }, {merge: true});
 
