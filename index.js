@@ -1726,6 +1726,10 @@ async function sendQuickReplyQueue(senderId, text, queue) {
 }
 
 async function blockFunc(senderId, senderData, psid) {
+    if (psid === null) {
+        await sendQuickReply(senderId, 'Bạn đang không kết nối với ai cả để block');
+        return;
+    }
 
     let blocked = senderData.data().blocked;
     if (blocked.includes(psid)) {
