@@ -675,8 +675,8 @@ app.post('/webhook', function (req, res) {
                                             }, {merge: true});
 
                                             await setDoc(doc(db, 'users', senderId), {
+                                                answered_questions: arrayUnion(senderData.data().crr_question),
                                                 crr_question: null,
-                                                answered_question: arrayUnion(senderData.data().crr_question)
                                             }, {merge: true});
 
                                             let link = 'https://lqdchatventure-web.herokuapp.com/ans?id=' + docSnapQuestions.id +
