@@ -674,7 +674,7 @@ app.post('/webhook', function (req, res) {
                                             }, {merge: true});
 
                                             await setDoc(doc(db, 'users', senderId), {
-                                                answered_questions: arrayUnion(senderData.data().id),
+                                                answered_questions: arrayUnion(docSnapQuestions.data().id),
                                                 crr_question: null,
                                             }, {merge: true});
 
