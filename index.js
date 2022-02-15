@@ -179,7 +179,7 @@ app.post('/webhook', function (req, res) {
                                         blocked: [],
                                         queued_timestamp: null,
                                         answered_questions: [],
-                                        asked_questions: [],
+                                        // asked_questions: [],
                                         listen_to_queue: true,
                                         exclude_last_connected: false,
                                         mask_id: docRef.id,
@@ -418,7 +418,7 @@ app.post('/webhook', function (req, res) {
                                         questIdList.push(i);
                                     }
 
-                                    if (questIdList === []) {
+                                    if (questIdList.length === 0) {
                                         bot.sendTextMessage(senderId, "Hiện không còn câu hỏi nào mà bạn chưa trả lời. Hãy đến đây " +
                                             "vào lúc khác")
                                     } else {
@@ -535,7 +535,7 @@ app.post('/webhook', function (req, res) {
                                         blocked: [],
                                         queued_timestamp: null,
                                         answered_questions: [],
-                                        asked_questions: [],
+                                        // asked_questions: [],
                                         listen_to_queue: true,
                                         exclude_last_connected: false,
                                         mask_id: docRef.id,
@@ -670,7 +670,6 @@ app.post('/webhook', function (req, res) {
 
                                             await setDoc(doc(db, 'questions', senderData.data().crr_question), {
                                                 answers_count: docSnapQuestions.data().answers_count + 1,
-                                                answered_users: arrayUnion(senderId),
                                             }, {merge: true});
 
                                             await setDoc(doc(db, 'users', senderId), {
