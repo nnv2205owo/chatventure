@@ -184,6 +184,7 @@ app.post('/webhook', function (req, res) {
                                         exclude_last_connected: false,
                                         mask_id: docRef.id,
                                         qa_requesting_id: null,
+                                        crr_question: null,
                                     });
 
                                     await setDoc(doc(db, 'names', profile.name + ' ' + profile.id), {
@@ -427,9 +428,19 @@ app.post('/webhook', function (req, res) {
 
                                         }, {merge: true});
 
-                                        docSnap = await getDoc(doc(db, 'questions', randQuestion.toString()));
 
-                                        await sendQuickReply(senderId, 'Câu hỏi : ' + docSnap.data().text);
+                                        let querySnapshot = await getDocs(query(collection(db, 'questions'),
+                                            where('id', '==', randQuestion.toString())));
+
+                                        querySnapshot.forEach((doc) => {
+                                            (async () => {
+                                                // doc.data() is never undefined for query doc snapshots
+                                                console.log(doc.id, " => ", doc.data());
+
+                                                await sendQuickReply(senderId, 'Câu hỏi : ' + doc.data().text);
+                                            })();
+                                        });
+
                                     }
 
                                 } else if (['câu hỏi của tôi', 'cau hoi cua toi', 'cauhoicuatoi'].includes(text.toLowerCase())) {
@@ -472,7 +483,7 @@ app.post('/webhook', function (req, res) {
                                     if (senderData.data().crr_question === null) {
                                         await sendQuickReplyQuestion(senderId, 'Bạn chưa tìm kiếm câu hỏi nào cả');
                                     } else {
-                                        let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question.toString()))
+                                        let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question))
                                         bot.sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
                                     }
                                 } else if (['block'].includes(text.toLowerCase())) {
@@ -620,21 +631,16 @@ app.post('/webhook', function (req, res) {
 
                                         // // console.log('Quests count : ', docSnap.data().questions_count)
 
-                                        let docRef = await addDoc(collection(db, 'global_vars', 'masks', 'questions'), {
-                                            id: docSnap.data().questions_count
-                                        });
-
-                                        await setDoc(doc(db, 'questions',
-                                            (docSnap.data().questions_count).toString()), {
+                                        await addDoc(doc(db, 'questions'), {
 
                                             text: parameter,
                                             answers_count: 0,
                                             timestamp: Date.now(),
                                             author: senderData.data().nickname,
                                             author_id: senderId,
-                                            mask_id: docRef.id
+                                            id: docSnap.data().questions_count
 
-                                        }, {merge: true});
+                                        });
 
                                         // // console.log('Hye');
 
@@ -644,21 +650,15 @@ app.post('/webhook', function (req, res) {
 
                                         }, {merge: true});
 
-                                        await setDoc(doc(db, 'users', senderId), {
-
-                                            asked_questions: arrayUnion(docSnap.data().questions_count),
-
-                                        }, {merge: true});
-
                                         await sendQuickReplyQuestion(senderId, "Câu hỏi của bạn đã được ghi lại");
 
                                     } else if (command.toLowerCase() === 'traloi') {
                                         if (senderData.data().crr_question === null) {
                                             await sendQuickReplyQuestion(senderId, 'Bạn chưa tìm kiếm câu hỏi nào cả');
                                         } else {
-                                            let docSnapQuestions = await getDoc(doc(db, 'questions', senderData.data().crr_question.toString()));
+                                            let docSnapQuestions = await getDoc(doc(db, 'questions', senderData.data().crr_question));
 
-                                            await setDoc(doc(db, 'questions', senderData.data().crr_question.toString(),
+                                            await setDoc(doc(db, 'questions', senderData.data().crr_question,
                                                 'answers', (docSnapQuestions.data().answers_count).toString()), {
                                                 text: parameter,
                                                 timestamp: Date.now(),
@@ -666,16 +666,17 @@ app.post('/webhook', function (req, res) {
                                                 author_id: senderId,
                                             }, {merge: true});
 
-                                            await setDoc(doc(db, 'questions', senderData.data().crr_question.toString()), {
-                                                answers_count: docSnapQuestions.data().answers_count + 1
+                                            await setDoc(doc(db, 'questions', senderData.data().crr_question), {
+                                                answers_count: docSnapQuestions.data().answers_count + 1,
+                                                answered_users: arrayUnion(senderId),
                                             }, {merge: true});
 
                                             await setDoc(doc(db, 'users', senderId), {
-                                                answered_questions: arrayUnion(senderData.data().crr_question),
-                                                crr_question: null
+                                                crr_question: null,
+                                                answered_question: arrayUnion(senderData.data().crr_question)
                                             }, {merge: true});
 
-                                            let link = 'https://lqdchatventure-web.herokuapp.com/ans?id=' + docSnapQuestions.data().mask_id +
+                                            let link = 'https://lqdchatventure-web.herokuapp.com/ans?id=' + docSnapQuestions.id +
                                                 '&senderId=' + senderData.data().mask_id;
 
                                             let elements = [{
