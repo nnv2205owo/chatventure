@@ -81,12 +81,12 @@ var bot = MessengerPlatform.create({
     pageToken: FB_pageToken
 }, server);
 
-// app.use(bot.webhook('/webhook'));
-// bot.on(MessengerPlatform.Events.MESSAGE, function (userId, message) {
-//     // add code below.
-// });
+app.use(bot.webhook('/webhook'));
+bot.on(MessengerPlatform.Events.MESSAGE, function (userId, message) {
+    // add code below.
+});
 
-app.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 3001);
 
 var timeout = {};
 var help_list = [
@@ -165,7 +165,7 @@ app.post('/webhook', function (req, res) {
                                         nickname: 'Ẩn danh',
                                         gender: profile.gender === undefined ? null : profile.gender,
                                         fb_link: null,
-                                        history_requesting_id: null,
+                                        history_requesting_timestamp: null,
                                         last_connect: null,
                                         id: senderId,
                                         topic: null,
@@ -521,7 +521,7 @@ app.post('/webhook', function (req, res) {
                                         nickname: 'Ẩn danh',
                                         gender: profile.gender === undefined ? null : profile.gender,
                                         fb_link: null,
-                                        history_requesting_id: null,
+                                        history_requesting_timestamp: null,
                                         last_connect: null,
                                         id: senderId,
                                         topic: null,
@@ -754,7 +754,7 @@ app.post('/webhook', function (req, res) {
 
                                     } else if (senderData.data().listen_to_queue === true &&
                                         (senderData.data().queued_timestamp !== null
-                                            || senderData.data().history_requesting_id !== null
+                                            || senderData.data().history_requesting_timestamp !== null
                                             || senderData.data().qa_requesting_id !== null)) {
 
                                         command_text = false;
@@ -770,7 +770,7 @@ app.post('/webhook', function (req, res) {
                                 //Attachments
 
                                 if (senderData.data().crr_timestamp === null
-                                    && senderData.data().history_requesting_id === null
+                                    && senderData.data().history_requesting_timestamp === null
                                     && senderData.data().queued_timestamp === null
                                     && senderData.data().qa_requesting_id === null) {
 
@@ -796,7 +796,7 @@ app.post('/webhook', function (req, res) {
                                             }
                                         } else if (senderData.data().listen_to_queue === true &&
                                             (senderData.data().queued_timestamp !== null
-                                                || senderData.data().history_requesting_id !== null
+                                                || senderData.data().history_requesting_timestamp !== null
                                                 || senderData.data().qa_requesting_id !== null)) {
 
                                             command_text = false;
@@ -845,7 +845,7 @@ app.post('/webhook', function (req, res) {
                                 //Check nếu đang trong hàng đợi hoặc đã kết nối
                                 if (senderData.data().crr_timestamp !== null
                                     || senderData.data().queued_timestamp !== null
-                                    || senderData.data().history_requesting_id !== null
+                                    || senderData.data().history_requesting_timestamp !== null
                                     || senderData.data().qa_requesting_id !== null) {
                                     await bot.sendTextMessage(senderId, 'Bạn phải không đang yêu cầu hoặc kết nối với ai. Hãy nhập lệnh thoát trước khi ' +
                                         'gửi yêu cầu kết nối');
@@ -879,7 +879,7 @@ app.post('/webhook', function (req, res) {
                                         //Sửa request, vào hàng đợi
                                         await setDoc(doc(db, 'users', senderId), {
 
-                                            history_requesting_id: timestamp,
+                                            history_requesting_timestamp: timestamp,
 
                                         }, {merge: true});
 
@@ -1019,10 +1019,10 @@ app.post('/webhook', function (req, res) {
                                         'hoặc người yêu cầu đã hủy lời mời');
                                 } else {
 
-                                    //Xóa queued và history_requesting_id
+                                    //Xóa queued và history_requesting_timestamp
                                     await setDoc(doc(db, 'users', senderId), {
 
-                                        history_requesting_id: null,
+                                        history_requesting_timestamp: null,
 
                                     }, {merge: true});
 
@@ -1080,10 +1080,10 @@ app.post('/webhook', function (req, res) {
 
                                     }, {merge: true});
 
-                                    //Remove history_requesting_id của họ
+                                    //Remove history_requesting_timestamp của họ
                                     await setDoc(doc(db, 'users', psid), {
 
-                                        history_requesting_id: null,
+                                        history_requesting_timestamp: null,
 
                                     }, {merge: true});
 
@@ -1149,7 +1149,7 @@ app.post('/webhook', function (req, res) {
                                             partner: null,
                                             // nickname: null,
                                             queued_timestamp: null,
-                                            history_requesting_id: null,
+                                            history_requesting_timestamp: null,
                                             crr_timestamp: null
                                             // gender: profile.gender === undefined ? null : profile.gender,
                                             // token: Math.floor(Math.random() * 69420),
@@ -1161,7 +1161,7 @@ app.post('/webhook', function (req, res) {
                                             partner: null,
                                             // nickname: null,
                                             queued_timestamp: null,
-                                            history_requesting_id: null,
+                                            history_requesting_timestamp: null,
                                             crr_timestamp: null
                                             // gender: profile.gender === undefined ? null : profile.gender,
                                             // token: Math.floor(Math.random() * 69420),
@@ -1377,7 +1377,7 @@ async function connect(senderId, gettedId) {
 
     await setDoc(doc(db, 'users', senderId), {
         partner: gettedId,
-        history_requesting_id: null,
+        history_requesting_timestamp: null,
         crr_timestamp: timestamp,
         last_connect: gettedId,
         queued_timestamp: null,
@@ -1402,7 +1402,7 @@ async function connect(senderId, gettedId) {
 
     await setDoc(doc(db, 'users', gettedId), {
         partner: senderId,
-        history_requesting_id: null,
+        history_requesting_timestamp: null,
         crr_timestamp: timestamp,
         last_connect: senderId,
         queued_timestamp: null,
@@ -1448,7 +1448,7 @@ async function addToQueue(senderId, senderData) {
 
     // Check nếu trong hàng đợi hoặc đã kết nối
     if (senderData.queued_timestamp !== null || senderData.crr_timestamp !== null
-        || senderData.history_requesting_id !== null || senderData.qa_requesting_id !== null) {
+        || senderData.history_requesting_timestamp !== null || senderData.qa_requesting_id !== null) {
         await bot.sendTextMessage(senderId, 'Bạn phải không kết nối hoặc đang yêu cầu / trong hàng đợi với ai');
         return;
     }
@@ -1816,7 +1816,7 @@ async function getOut(senderId, senderData) {
         //Check nếu đang trong hàng đợi hoặc đã kết nối hoặc đang request
         if (senderData.data().queued_timestamp === null
             && senderData.data().crr_timestamp === null
-            && senderData.data().history_requesting_id === null
+            && senderData.data().history_requesting_timestamp === null
             && senderData.data().qa_requesting_id === null) {
             return 0;
         }
@@ -1842,17 +1842,17 @@ async function getOut(senderId, senderData) {
         }
 
         //Nếu đang request
-        if (senderData.data().history_requesting_id !== null) {
+        if (senderData.data().history_requesting_timestamp !== null) {
 
             //Hủy lời mời kết nối cho bản thân
             await setDoc(doc(db, 'users', senderId,
-                'history', senderData.data().history_requesting_id.toString()), {
+                'history', senderData.data().history_requesting_timestamp.toString()), {
                 requested: false
             }, {merge: true});
 
             //Query lấy psid người được request
             let docRef = doc(db, 'users', senderId
-                , 'history', senderData.data().history_requesting_id.toString());
+                , 'history', senderData.data().history_requesting_timestamp.toString());
             let docSnapHistory = await getDoc(docRef);
 
             //Hủy lời mời cho người được request
@@ -1866,7 +1866,7 @@ async function getOut(senderId, senderData) {
         await setDoc(doc(db, 'users', senderId), {
             partner: null,
             // nickname: null,
-            history_requesting_id: null,
+            history_requesting_timestamp: null,
             crr_timestamp: null,
             find_gender: null,
             queued_timestamp: null,
