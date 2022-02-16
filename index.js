@@ -1467,13 +1467,13 @@ async function addToQueue(senderId, senderData) {
         let gettedDoc = querySnapshot.docs[x];
         let gettedDocData = gettedDoc.data();
 
-        // // console.log('hey ' + gettedDocData.last_connect);
+        // console.log('hey ' + gettedDocData.last_connect);
 
         if (gettedDocData.exclude_last_connected === true && gettedDocData.last_connect === senderId) continue;
         if (senderData.exclude_last_connected === true && senderData.last_connect === gettedDoc.id) continue;
         // console.log('Not last connected');
 
-        // // console.log('ayo ', gettedDocData.find_tags,
+        // console.log('ayo ', gettedDocData.find_tags,
         //     gettedDocData.id, senderData.find_tags);
 
         if (senderData.find_tags.length !== 0) {
@@ -1514,7 +1514,9 @@ async function addToQueue(senderId, senderData) {
         if (senderData.find_gender !== null && senderData.find_gender !== gettedDocData.gender) continue;
         if (gettedDocData.find_gender !== null && gettedDocData.find_gender !== senderData.gender) continue;
 
-        // console.log('Gender match');
+        console.log('Gender match');
+        console.log(senderData.find_gender, senderData.gender);
+        console.log(gettedDocData.find_gender, gettedDocData.gender);
 
         if (senderData.blocked.includes(gettedDoc.id)) continue;
         if (gettedDocData.blocked.includes(senderId)) continue;
