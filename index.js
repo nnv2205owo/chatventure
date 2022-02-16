@@ -166,6 +166,7 @@ app.post('/webhook', function (req, res) {
                                         gender: profile.gender === undefined ? null : profile.gender,
                                         fb_link: null,
                                         history_requesting_timestamp: null,
+                                        history_requesting_id: null,
                                         last_connect: null,
                                         id: senderId,
                                         topic: null,
@@ -385,6 +386,27 @@ app.post('/webhook', function (req, res) {
                                     });
                                     await sendList(senderId, command_elements);
                                     await sendList(senderId, remove_elements);
+                                } else if (['yêu cầu kết nối', 'yeu cau ket noi', 'yeucauketnoi']) {
+
+                                    let querySnapshot = await getDocs(query(collection(db, 'users'),
+                                        where('history_requesting_id', '==', randQuestion)));
+
+                                    querySnapshot.forEach((docSnap) => {
+                                        (async () => {
+                                            // doc.data() is never undefined for query doc snapshots
+                                            // console.log(doc.id, " => ", doc.data());
+
+                                            await sendQuickReply(senderId, 'Câu hỏi : ' + docSnap.data().text);
+
+                                            await setDoc(doc(db, 'users', senderId), {
+
+                                                crr_question: docSnap.id,
+
+                                            }, {merge: true});
+
+                                        })();
+                                    });
+
                                 } else if (['tìm nam', 'tim nam', 'timnam'].includes(text.toLowerCase())) {
 
                                     await addToQueue(senderId, senderData, 'male');
@@ -511,7 +533,7 @@ app.post('/webhook', function (req, res) {
 
                                     await setDoc(doc(db, 'users', senderId), {
                                         nickname: 'Ẩn danh',
-                                        gender: profile.gender === undefined ? null : profile.gender,
+                                        gender: null,
                                         fb_link: null,
                                         history_requesting_timestamp: null,
                                         last_connect: null,
@@ -872,6 +894,8 @@ app.post('/webhook', function (req, res) {
                                         await setDoc(doc(db, 'users', senderId), {
 
                                             history_requesting_timestamp: timestamp,
+                                            history_requesting_id: psid,
+                                            queued_timestamp: Date.now()
 
                                         }, {merge: true});
 
@@ -1015,6 +1039,8 @@ app.post('/webhook', function (req, res) {
                                     await setDoc(doc(db, 'users', senderId), {
 
                                         history_requesting_timestamp: null,
+                                        history_requesting_id: null,
+                                        queued_timestamp: null
 
                                     }, {merge: true});
 
@@ -1076,6 +1102,8 @@ app.post('/webhook', function (req, res) {
                                     await setDoc(doc(db, 'users', psid), {
 
                                         history_requesting_timestamp: null,
+                                        history_requesting_id: null,
+                                        queued_timestamp: null
 
                                     }, {merge: true});
 
@@ -1370,6 +1398,7 @@ async function connect(senderId, gettedId) {
     await setDoc(doc(db, 'users', senderId), {
         partner: gettedId,
         history_requesting_timestamp: null,
+        history_requesting_id: null,
         crr_timestamp: timestamp,
         last_connect: gettedId,
         queued_timestamp: null,
@@ -1395,6 +1424,7 @@ async function connect(senderId, gettedId) {
     await setDoc(doc(db, 'users', gettedId), {
         partner: senderId,
         history_requesting_timestamp: null,
+        history_requesting_id: null,
         crr_timestamp: timestamp,
         last_connect: senderId,
         queued_timestamp: null,
@@ -1870,6 +1900,7 @@ async function getOut(senderId, senderData) {
             partner: null,
             // nickname: null,
             history_requesting_timestamp: null,
+            history_requesting_id: null,
             crr_timestamp: null,
             find_gender: null,
             queued_timestamp: null,
