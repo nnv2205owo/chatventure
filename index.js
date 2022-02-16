@@ -209,7 +209,7 @@ app.post('/webhook', function (req, res) {
 
                                 if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem'].includes(text.toLowerCase())) {
                                     try {
-                                        await addToQueue(senderId, senderData);
+                                        await addToQueue(senderId, senderData, null);
                                     } catch
                                         (e) {
                                         // Deal with the fact the chain failed
@@ -386,20 +386,12 @@ app.post('/webhook', function (req, res) {
                                     await sendList(senderId, command_elements);
                                     await sendList(senderId, remove_elements);
                                 } else if (['tìm nam', 'tim nam', 'timnam'].includes(text.toLowerCase())) {
-                                    await setDoc(doc(db, 'users', senderId), {
 
-                                        find_gender: 'male',
-
-                                    }, {merge: true});
-                                    await addToQueue(senderId, senderData);
+                                    await addToQueue(senderId, senderData, 'male');
 
                                 } else if (['tìm nữ', 'tim nu', 'timnu'].includes(text.toLowerCase())) {
-                                    await setDoc(doc(db, 'users', senderId), {
 
-                                        find_gender: 'female',
-
-                                    }, {merge: true});
-                                    await addToQueue(senderId, senderData);
+                                    await addToQueue(senderId, senderData, 'female');
 
                                 } else if (['trợ giúp', 'tro giup', 'trogiup', 'help'].includes(text.toLowerCase())) {
                                     for (let help in help_list) {
@@ -1443,8 +1435,17 @@ async function connect(senderId, gettedId) {
 
 }
 
-async function addToQueue(senderId, senderData) {
+async function addToQueue(senderId, senderData, find_gender) {
+
+    if (find_gender !== null)
+        await setDoc(doc(db, 'users', senderId), {
+
+            find_gender: find_gender,
+
+        }, {merge: true});
+
     senderData = senderData.data();
+    senderData.find_gender = find_gender;
 
     // Check nếu trong hàng đợi hoặc đã kết nối
     if (senderData.queued_timestamp !== null || senderData.crr_timestamp !== null
