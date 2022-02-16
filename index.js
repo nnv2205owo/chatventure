@@ -81,12 +81,12 @@ var bot = MessengerPlatform.create({
     pageToken: FB_pageToken
 }, server);
 
-app.use(bot.webhook('/webhook'));
-bot.on(MessengerPlatform.Events.MESSAGE, function (userId, message) {
-    // add code below.
-});
+// app.use(bot.webhook('/webhook'));
+// bot.on(MessengerPlatform.Events.MESSAGE, function (userId, message) {
+//     // add code below.
+// });
 
-app.listen(process.env.PORT || 3001);
+app.listen(process.env.PORT || 3000);
 
 var timeout = {};
 var help_list = [
