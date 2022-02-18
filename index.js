@@ -1617,9 +1617,9 @@ async function addToQueue(senderId, senderData, find_gender) {
         if (senderData.find_gender !== null && senderData.find_gender !== gettedDocData.gender) continue;
         if (gettedDocData.find_gender !== null && gettedDocData.find_gender !== senderData.gender) continue;
 
-        console.log('Gender match');
-        console.log(senderData.find_gender, senderData.gender);
-        console.log(gettedDocData.find_gender, gettedDocData.gender);
+        // console.log('Gender match');
+        // console.log(senderData.find_gender, senderData.gender);
+        // console.log(gettedDocData.find_gender, gettedDocData.gender);
 
         if (senderData.blocked.includes(gettedDoc.id)) continue;
         if (gettedDocData.blocked.includes(senderId)) continue;
