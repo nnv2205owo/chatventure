@@ -238,7 +238,7 @@ app.post('/webhook', function (req, res) {
                                         await sendList(senderId, elements);
 
                                     } else if (['phonggapmat', 'phong gap mat', 'phòng gặp mặt'].includes(text.toLowerCase())) {
-                                        let link = 'https://lqdchatventure-web.herokuapp.com/meeting_roooms?id=' + senderData.data().mask_id;
+                                        let link = 'https://lqdchatventure-web.herokuapp.com/meeting_rooms?id=' + senderData.data().mask_id;
                                         let elements = [{
                                             'title': 'Profile của bạn',
                                             'default_action': {
