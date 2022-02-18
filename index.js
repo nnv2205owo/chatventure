@@ -240,7 +240,7 @@ app.post('/webhook', function (req, res) {
                                     } else if (['phonggapmat', 'phong gap mat', 'phòng gặp mặt'].includes(text.toLowerCase())) {
                                         let link = 'https://lqdchatventure-web.herokuapp.com/meeting_rooms?id=' + senderData.data().mask_id;
                                         let elements = [{
-                                            'title': 'Profile của bạn',
+                                            'title': 'Danh sách phòng gặp mặt',
                                             'default_action': {
                                                 'type': 'web_url',
                                                 'url': link,
@@ -250,7 +250,7 @@ app.post('/webhook', function (req, res) {
                                                 {
                                                     'type': 'web_url',
                                                     'url': link,
-                                                    'title': 'Profile của bạn'
+                                                    'title': 'Nhấn vào đây'
                                                 }
                                             ]
                                         }];
