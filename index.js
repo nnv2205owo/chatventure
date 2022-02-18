@@ -143,13 +143,13 @@ app.post('/webhook', function (req, res) {
                                     if (senderId === '105254598184667') return;
 
                                     // Check kết nối lần đầu, setup profile
-                                    await bot.sendTextMessage(senderId, 'Hey. Lần đầu? Bạn có thể sẽ muốn ' +
+                                    await sendTextMessage(senderId, 'Hey. Lần đầu? Bạn có thể sẽ muốn ' +
                                         'đọc qua hướng dẫn bằng cách gõ \'help\' trước đấy'
                                     );
-                                    await bot.sendTextMessage(senderId, 'Đầu tiên bạn có thể sẽ muốn đặt nickname của' +
+                                    await sendTextMessage(senderId, 'Đầu tiên bạn có thể sẽ muốn đặt nickname của' +
                                         ' bản thân bằng cú pháp : \n nickname < nickname của bạn > (Mặc định : \'Ẩn danh\')');
 
-                                    await bot.sendTextMessage(senderId, "Hoặc là thiết lập giới tính của mình bằng lệnh \n gioitinh + < nam | nu | khongdat >\n(Mặc định : khongdat)");
+                                    await sendTextMessage(senderId, "Hoặc là thiết lập giới tính của mình bằng lệnh \n gioitinh + < nam | nu | khongdat >\n(Mặc định : khongdat)");
 
                                     await sendQuickReply(senderId, "Thiết lập profile của bạn có thể giúp dễ dàng tìm kiếm hiệu quả và hợp lý hơn " +
                                         "cho bạn và mọi người");
@@ -445,9 +445,9 @@ app.post('/webhook', function (req, res) {
                                         });
 
                                         if (history_elements.length === 0) {
-                                            bot.sendTextMessage(senderId, "Bạn hiên chưa có yêu cầu kết nối qua lịch sử từ ai cả");
+                                            sendTextMessage(senderId, "Bạn hiên chưa có yêu cầu kết nối qua lịch sử từ ai cả");
                                         } else {
-                                            bot.sendTextMessage(senderId, "Yêu cầu kết nối qua lịch sử cuộc trò chuyện");
+                                            sendTextMessage(senderId, "Yêu cầu kết nối qua lịch sử cuộc trò chuyện");
                                             await sendList(senderId, history_elements);
                                         }
 
@@ -488,9 +488,9 @@ app.post('/webhook', function (req, res) {
                                         });
 
                                         if (qa_elements.length === 0) {
-                                            bot.sendTextMessage(senderId, "Bạn hiên chưa có yêu cầu kết nối qua câu hỏi từ ai cả");
+                                            sendTextMessage(senderId, "Bạn hiên chưa có yêu cầu kết nối qua câu hỏi từ ai cả");
                                         } else {
-                                            bot.sendTextMessage(senderId, "Yêu cầu kết nối qua câu hỏi");
+                                            sendTextMessage(senderId, "Yêu cầu kết nối qua câu hỏi");
                                             await sendList(senderId, qa_elements);
                                         }
 
@@ -520,7 +520,7 @@ app.post('/webhook', function (req, res) {
                                         }
 
                                         if (questIdList.length === 0) {
-                                            bot.sendTextMessage(senderId, "Hiện không còn câu hỏi nào mà bạn chưa trả lời. Hãy đến đây " +
+                                            sendTextMessage(senderId, "Hiện không còn câu hỏi nào mà bạn chưa trả lời. Hãy đến đây " +
                                                 "vào lúc khác")
                                         } else {
                                             let randQuestion = Math.floor(Math.random() * questIdList.length);
@@ -588,7 +588,7 @@ app.post('/webhook', function (req, res) {
                                             await sendQuickReplyQuestion(senderId, 'Bạn chưa tìm kiếm câu hỏi nào cả');
                                         } else {
                                             let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question))
-                                            bot.sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
+                                            sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
                                         }
                                     } else if (['block'].includes(text.toLowerCase())) {
                                         await blockFunc(senderId, senderData, senderData.data().partner);
@@ -660,13 +660,13 @@ app.post('/webhook', function (req, res) {
                                             querySnapshot.forEach((gettedDoc) => {
                                                 (async () => {
                                                     try {
-                                                        await bot.sendTextMessage(gettedDoc.id, parameter);
+                                                        await sendTextMessage(gettedDoc.id, parameter);
                                                     } catch (e) {
                                                         console.log("Err: " + e);
                                                     }
                                                 })();
                                             });
-                                            await bot.sendTextMessage(senderId, "Đã gửi tin nhắn global");
+                                            await sendTextMessage(senderId, "Đã gửi tin nhắn global");
                                         } else if (command.toLowerCase() === 'fblink') {
                                             await setDoc(doc(db, 'users', senderId), {
 
@@ -725,7 +725,7 @@ app.post('/webhook', function (req, res) {
 
                                                 }, {merge: true});
 
-                                                await bot.sendTextMessage(senderId, 'Bạn đã đặt nickname cho đối tượng là ' + parameter);
+                                                await sendTextMessage(senderId, 'Bạn đã đặt nickname cho đối tượng là ' + parameter);
                                             }
                                         } else if (command.toLowerCase() === 'cauhoi' || command.toLowerCase() === 'ask') {
 
@@ -783,7 +783,7 @@ app.post('/webhook', function (req, res) {
 
                                             }, {merge: true});
 
-                                            await bot.sendTextMessage(senderId, "Câu hỏi hệ thống đã được ghi lại");
+                                            await sendTextMessage(senderId, "Câu hỏi hệ thống đã được ghi lại");
 
                                         } else if (command.toLowerCase() === 'traloi') {
                                             if (senderData.data().crr_question === null) {
@@ -851,7 +851,7 @@ app.post('/webhook', function (req, res) {
 
                                         if (senderData.data().crr_timestamp !== null) {
                                             command_text = false;
-                                            await bot.sendTextMessage(senderData.data().partner, text);
+                                            await sendTextMessage(senderData.data().partner, text);
 
                                         } else if (senderData.data().listen_to_queue === true &&
                                             (senderData.data().queued_timestamp !== null
@@ -915,16 +915,16 @@ app.post('/webhook', function (req, res) {
                                                         && queued_user !== senderId) {
 
                                                         if (type === 'image') {
-                                                            await bot.sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 ảnh");
+                                                            await sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 ảnh");
                                                             await bot.sendImageMessage(queued_user, payload);
                                                         } else if (type === 'audio') {
-                                                            await bot.sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 đoạn âm thanh");
+                                                            await sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 đoạn âm thanh");
                                                             await bot.sendAudioMessage(queued_user, payload);
                                                         } else if (type === 'video') {
-                                                            await bot.sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 video");
+                                                            await sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 video");
                                                             await bot.sendVideoMessage(queued_user, payload);
                                                         } else if (type === 'file') {
-                                                            await bot.sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 file");
+                                                            await sendTextMessage(queued_user, senderData.data().nickname + " đã gửi 1 file");
                                                             await bot.sendFileMessage(queued_user, payload);
                                                         }
                                                     }
@@ -948,7 +948,7 @@ app.post('/webhook', function (req, res) {
                                         || senderData.data().queued_timestamp !== null
                                         || senderData.data().history_requesting_timestamp !== null
                                         || senderData.data().qa_requesting_id !== null) {
-                                        await bot.sendTextMessage(senderId, 'Bạn phải không đang yêu cầu hoặc kết nối với ai. Hãy nhập lệnh thoát trước khi ' +
+                                        await sendTextMessage(senderId, 'Bạn phải không đang yêu cầu hoặc kết nối với ai. Hãy nhập lệnh thoát trước khi ' +
                                             'gửi yêu cầu kết nối');
                                     } else {
 
@@ -957,7 +957,7 @@ app.post('/webhook', function (req, res) {
                                         let docSnap = await getDoc(docRef);
 
                                         if (!docSnap.exists()) {
-                                            bot.sendTextMessage(senderId, 'Lịch sử cuộc trò chuyện này đã bị xóa bởi bạn ' +
+                                            sendTextMessage(senderId, 'Lịch sử cuộc trò chuyện này đã bị xóa bởi bạn ' +
                                                 'hoặc đối tác');
                                             return;
                                         }
@@ -1000,7 +1000,7 @@ app.post('/webhook', function (req, res) {
 
                                             await sendQueueTextMessage(senderId, senderData.data().nickname + ' đã tham gia phòng đợi');
 
-                                            await bot.sendTextMessage(senderId, 'Đã gửi yêu cầu kết nối cho ' +
+                                            await sendTextMessage(senderId, 'Đã gửi yêu cầu kết nối cho ' +
                                                 'người dùng lúc ' + timeConverter(timestamp));
 
                                             await setDoc(doc(db, 'users', psid, 'history', timestamp.toString()), {
@@ -1009,7 +1009,7 @@ app.post('/webhook', function (req, res) {
 
                                             }, {merge: true});
 
-                                            await bot.sendTextMessage(psid, 'Người dùng lúc ' + timeConverter(timestamp)
+                                            await sendTextMessage(psid, 'Người dùng lúc ' + timeConverter(timestamp)
                                                 + ' đã gửi yêu cầu kết nối');
 
                                             let docRef = doc(db, 'users', psid, 'history', timestamp.toString());
@@ -1082,7 +1082,7 @@ app.post('/webhook', function (req, res) {
 
                                     //Check nếu trong hàng đợi hoặc đã kết nối
                                     if (senderData.data().crr_timestamp !== null) {
-                                        await bot.sendTextMessage(senderId, ' Bạn phải không trong hàng đợi / yêu cầu ' +
+                                        await sendTextMessage(senderId, ' Bạn phải không trong hàng đợi / yêu cầu ' +
                                             'kết nối tới người khác. Hãy \'thoat\' trước khi đồng ý kết nối');
                                     } else {
                                         //Check nếu yêu cầu còn hiệu lực
@@ -1107,7 +1107,7 @@ app.post('/webhook', function (req, res) {
                                         } else {
 
                                             //Lời mời không còn hiệu lực khi timestamp của người mời đã hủy requested
-                                            await bot.sendTextMessage(senderId, 'Người dùng hiện không còn yêu cầu kết nối tới bạn');
+                                            await sendTextMessage(senderId, 'Người dùng hiện không còn yêu cầu kết nối tới bạn');
                                         }
                                     }
                                 }
@@ -1118,7 +1118,7 @@ app.post('/webhook', function (req, res) {
                                     let docSnap = await getDoc(docRef);
                                     //Nếu yêu cầu đã bị xóa (Người kia từ chối hoặc mình exit hoặc đã remove)
                                     if (!docSnap.exists() || docSnap.data().requested === false) {
-                                        await bot.sendTextMessage(senderId, 'Bạn đã không còn yêu cầu kết nối với người dùng này ' +
+                                        await sendTextMessage(senderId, 'Bạn đã không còn yêu cầu kết nối với người dùng này ' +
                                             'hoặc người yêu cầu đã hủy lời mời');
                                     } else {
 
@@ -1154,7 +1154,7 @@ app.post('/webhook', function (req, res) {
 
                                         }, {merge: true});
 
-                                        await bot.sendTextMessage(senderId, 'Bạn đã hủy yêu cầu kết nối');
+                                        await sendTextMessage(senderId, 'Bạn đã hủy yêu cầu kết nối');
                                     }
 
                                 }
@@ -1167,7 +1167,7 @@ app.post('/webhook', function (req, res) {
 
                                     //Nếu yêu cầu hết hiệu lực vì đã bị rejected, người kia remove hoặc exit
                                     if (docSnap.data().requested === false) {
-                                        await bot.sendTextMessage(senderId, 'Bạn đã không còn yêu cầu kết nối với người dùng này ' +
+                                        await sendTextMessage(senderId, 'Bạn đã không còn yêu cầu kết nối với người dùng này ' +
                                             'hoặc người yêu cầu đã hủy lời mời');
                                     } else {
 
@@ -1204,8 +1204,8 @@ app.post('/webhook', function (req, res) {
                                         let docSnapNickname = await getDoc(doc(db, 'users', psid));
                                         await sendQueueTextMessage(psid, docSnapNickname.data().nickname + ' đã thoát khỏi phòng đợi');
 
-                                        await bot.sendTextMessage(senderId, 'Bạn đã từ chối cầu kết nối');
-                                        await bot.sendTextMessage(psid, 'Người dùng vào lúc ' + timeConverter(timestamp)
+                                        await sendTextMessage(senderId, 'Bạn đã từ chối cầu kết nối');
+                                        await sendTextMessage(psid, 'Người dùng vào lúc ' + timeConverter(timestamp)
                                             + ' đã từ chối yêu cầu kết nối của bạn');
                                     }
 
@@ -1216,25 +1216,25 @@ app.post('/webhook', function (req, res) {
                                     if (senderData.data().crr_timestamp === timestamp) {
 
                                         if (senderData.data().fb_link === null) {
-                                            await bot.sendTextMessage(senderId, 'Bạn chưa thiết lập tài khoản FB')
+                                            await sendTextMessage(senderId, 'Bạn chưa thiết lập tài khoản FB')
                                         } else {
                                             await setDoc(doc(db, 'users', psid,
                                                 'history', senderData.data().crr_timestamp.toString()), {
                                                 fb_link: senderData.data().fb_link
                                             }, {merge: true});
 
-                                            await bot.sendTextMessage(senderId, 'Đã gửi');
-                                            await bot.sendTextMessage(psid, 'Đã nhận ' + senderData.data().fb_link);
+                                            await sendTextMessage(senderId, 'Đã gửi');
+                                            await sendTextMessage(psid, 'Đã nhận ' + senderData.data().fb_link);
                                         }
                                     } else {
-                                        await bot.sendTextMessage(senderId, 'Bạn không còn kết nối với người này')
+                                        await sendTextMessage(senderId, 'Bạn không còn kết nối với người này')
                                     }
                                 } else if (payload[0] === 'DELETE_HISTORY_PAYLOAD') {
                                     let docRef = doc(db, 'users', psid, 'history', timestamp.toString());
                                     let docSnap = await getDoc(docRef);
 
                                     if (!docSnap.exists()) {
-                                        await bot.sendTextMessage(psid, 'Lịch sử đã bị xóa từ trước')
+                                        await sendTextMessage(psid, 'Lịch sử đã bị xóa từ trước')
                                     } else {
                                         let queryHistory = query(collection(db, 'users', senderId, 'history')
                                             , where('psid', '==', psid)
@@ -1275,9 +1275,9 @@ app.post('/webhook', function (req, res) {
                                                 // age: null,
                                             }, {merge: true});
 
-                                            await bot.sendTextMessage(psid, 'Bạn đã bị xóa lịch sử với người này thành công');
+                                            await sendTextMessage(psid, 'Bạn đã bị xóa lịch sử với người này thành công');
                                         }
-                                        await bot.sendTextMessage(senderId, 'Bạn đã xóa lịch sửs với người này thành công');
+                                        await sendTextMessage(senderId, 'Bạn đã xóa lịch sửs với người này thành công');
                                     }
                                 } else if (payload[0] === 'BLOCK_PAYLOAD') {
                                     await blockFunc(senderId, senderData, psid);
@@ -1288,7 +1288,7 @@ app.post('/webhook', function (req, res) {
 
                                         //Check nếu trong hàng đợi hoặc đã kết nối
                                         if (senderData.data().crr_timestamp !== null) {
-                                            await bot.sendTextMessage(senderId, ' Bạn phải không trong hàng đợi / yêu cầu ' +
+                                            await sendTextMessage(senderId, ' Bạn phải không trong hàng đợi / yêu cầu ' +
                                                 'kết nối tới người khác. Hãy \'thoat\' trước khi đồng ý kết nối');
                                         } else {
                                             //Check nếu yêu cầu còn hiệu lực
@@ -1299,7 +1299,7 @@ app.post('/webhook', function (req, res) {
                                                 await connect(senderId, psid);
                                             } else {
                                                 //Lời mời không còn hiệu lực khi timestamp của người mời đã hủy requested
-                                                await bot.sendTextMessage(senderId, 'Người dùng hiện không còn yêu cầu kết nối tới bạn');
+                                                await sendTextMessage(senderId, 'Người dùng hiện không còn yêu cầu kết nối tới bạn');
                                             }
                                         }
                                     } else if (payload[0] === 'QA_REJECT_REQUEST_PAYLOAD') {
@@ -1309,8 +1309,8 @@ app.post('/webhook', function (req, res) {
                                             await setDoc(doc(db, 'users', psid), {
                                                 qa_requesting_id: null,
                                             }, {merge: true});
-                                            await bot.sendTextMessage(psid, 'Rejected');
-                                            await bot.sendTextMessage(senderId, 'Yêu cầu kết nối của bạn đã bị từ chối');
+                                            await sendTextMessage(psid, 'Rejected');
+                                            await sendTextMessage(senderId, 'Yêu cầu kết nối của bạn đã bị từ chối');
 
                                             await setDoc(doc(db, 'global_vars', 'queue'), {
                                                 queue_list: arrayRemove(psid)
@@ -1318,7 +1318,7 @@ app.post('/webhook', function (req, res) {
 
                                         } else {
                                             //Lời mời không còn hiệu lực khi timestamp của người mời đã hủy requested
-                                            await bot.sendTextMessage(senderId, 'Người dùng hiện không còn yêu cầu kết nối tới bạn');
+                                            await sendTextMessage(senderId, 'Người dùng hiện không còn yêu cầu kết nối tới bạn');
                                         }
                                     } else if (payload[0] === 'QA_REMOVE_REQUEST_PAYLOAD') {
 
@@ -1334,7 +1334,7 @@ app.post('/webhook', function (req, res) {
 
                                         } else {
                                             //Lời mời không còn hiệu lực khi timestamp của người mời đã hủy requested
-                                            await bot.sendTextMessage(senderId, 'Bạn không còn yêu cầu kết nối tới người dùng');
+                                            await sendTextMessage(senderId, 'Bạn không còn yêu cầu kết nối tới người dùng');
                                         }
                                     }
                                 }
@@ -1344,9 +1344,9 @@ app.post('/webhook', function (req, res) {
 
                                 let react = message.reaction;
                                 if (react.action === 'react')
-                                    await bot.sendTextMessage(senderData.data().partner, 'Đã thả react ' + react.emoji);
+                                    await sendTextMessage(senderData.data().partner, 'Đã thả react ' + react.emoji);
                                 else
-                                    await bot.sendTextMessage(senderData.data().partner, 'Đã xóa react');
+                                    await sendTextMessage(senderData.data().partner, 'Đã xóa react');
 
                                 // if (senderData.data().crr_timestamp !== null) {
                                 //     let react = message.reaction;
@@ -1364,7 +1364,7 @@ app.post('/webhook', function (req, res) {
                                 //             // console.log(senderData.data().partner, reactMessage);
                                 //
                                 //             (async () => {
-                                //                 await bot.sendTextMessage(senderData.data().partner, reactMessage);
+                                //                 await sendTextMessage(senderData.data().partner, reactMessage);
                                 //             })();
                                 //
                                 //         }
@@ -1550,8 +1550,8 @@ async function connect(senderId, gettedId) {
     let docSnapNickname = await getDoc(doc(db, 'users', gettedId));
 
     await sendQueueTextMessage(gettedId, docSnapNickname.data().nickname + ' đã được kết nối và thoát khỏi phòng đợi');
-    await bot.sendTextMessage(senderId, 'Bạn đã được kết nối. Nói lời chào với người bạn mới đi nào');
-    await bot.sendTextMessage(gettedId, 'Bạn đã được kết nối. Nói lời chào với người bạn mới đi nào');
+    await sendTextMessage(senderId, 'Bạn đã được kết nối. Nói lời chào với người bạn mới đi nào');
+    await sendTextMessage(gettedId, 'Bạn đã được kết nối. Nói lời chào với người bạn mới đi nào');
 
 }
 
@@ -1570,7 +1570,7 @@ async function addToQueue(senderId, senderData, find_gender) {
     // Check nếu trong hàng đợi hoặc đã kết nối
     if (senderData.queued_timestamp !== null || senderData.crr_timestamp !== null
         || senderData.history_requesting_timestamp !== null || senderData.qa_requesting_id !== null) {
-        await bot.sendTextMessage(senderId, 'Bạn phải không kết nối hoặc đang yêu cầu / trong hàng đợi với ai');
+        await sendTextMessage(senderId, 'Bạn phải không kết nối hoặc đang yêu cầu / trong hàng đợi với ai');
         return;
     }
 
@@ -1663,7 +1663,7 @@ async function addToQueue(senderId, senderData, find_gender) {
         let docSnapNickname = await getDoc(doc(db, 'users', senderId));
         await sendQueueTextMessage(senderId, docSnapNickname.data().nickname + ' đã tham gia phòng đợi');
 
-        await bot.sendTextMessage(senderId, 'Đang chờ kết nối. Bạn đã được đưa vào hàng chờ');
+        await sendTextMessage(senderId, 'Đang chờ kết nối. Bạn đã được đưa vào hàng chờ');
 
     } else {
         await connect(senderId, find);
@@ -1673,7 +1673,7 @@ async function addToQueue(senderId, senderData, find_gender) {
 function checkIfParameterCmd(text) {
     let command = text.substr(0, text.indexOf(' '));
     if (command.toLowerCase() === '') {
-        // bot.sendTextMessage(senderId, "Lệnh không hợp lệ");
+        // sendTextMessage(senderId, "Lệnh không hợp lệ");
         return false;
 
     }
@@ -1697,7 +1697,7 @@ async function sendQueueTextMessage(senderId, text) {
         if (docSnapQueueUser.data().listen_to_queue === true
             && queued_user !== senderId) {
             try {
-                await bot.sendTextMessage(queued_user, nickname + " :\n\n" + text);
+                await sendTextMessage(queued_user, nickname + " :\n\n" + text);
             } catch (e) {
                 console.log("Error at sendQueueTextMessage:", e);
             }
@@ -2007,5 +2007,13 @@ async function getOut(senderId, senderData) {
         // Deal with the fact the chain failed
         console.log('Exit error:', e);
         return -1;
+    }
+}
+
+async function sendTextMessage(senderId, text) {
+    try {
+        await bot.sendTextMessage(senderId, text);
+    } catch (e) {
+        console.log("Error bot.send: ", e);
     }
 }
