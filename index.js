@@ -237,6 +237,24 @@ app.post('/webhook', function (req, res) {
                                         }];
                                         await sendList(senderId, elements);
 
+                                    } else if (['phonggapmat', 'phong gap mat', 'phòng gặp mặt'].includes(text.toLowerCase())) {
+                                        let link = 'https://lqdchatventure-web.herokuapp.com/meeting_roooms?id=' + senderData.data().mask_id;
+                                        let elements = [{
+                                            'title': 'Profile của bạn',
+                                            'default_action': {
+                                                'type': 'web_url',
+                                                'url': link,
+                                                'webview_height_ratio': 'full',
+                                            },
+                                            'buttons': [
+                                                {
+                                                    'type': 'web_url',
+                                                    'url': link,
+                                                    'title': 'Profile của bạn'
+                                                }
+                                            ]
+                                        }];
+                                        await sendList(senderId, elements);
                                     } else if (['thoát', 'thoat', 'kết thúc', 'ket thuc', 'ketthuc'].includes(text.toLowerCase())) {
 
                                         let code = await getOut(senderId, senderData);
