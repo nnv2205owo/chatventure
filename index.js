@@ -208,7 +208,8 @@ app.post('/webhook', function (req, res) {
                                         last_text: text,
                                     }, {merge: true});
 
-                                    if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem'].includes(text.toLowerCase())) {
+                                    if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem', 'bắt đầu', 'batdau', 'bat dau']
+                                        .includes(text.toLowerCase())) {
                                         try {
                                             await addToQueue(senderId, senderData, null);
                                         } catch
