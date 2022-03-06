@@ -23,12 +23,6 @@ import express from 'express';
 import request from 'request';
 import MessengerPlatform from 'facebook-bot-messenger';
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
 const
     FIREBASE_apiKey = process.env.FIREBASE_apiKey,
     FIREBASE_authDomain = process.env.FIREBASE_authDomain,
@@ -239,7 +233,9 @@ app.post('/webhook', function (req, res) {
                                         await sendList(senderId, elements);
 
                                     } else if (['phonggapmat', 'phong gap mat', 'phòng gặp mặt'].includes(text.toLowerCase())) {
+
                                         let link = 'https://lqdchatventure-web.herokuapp.com/meeting_rooms?id=' + senderData.data().mask_id;
+
                                         let elements = [{
                                             'title': 'Danh sách phòng gặp mặt',
                                             'default_action': {
@@ -255,7 +251,31 @@ app.post('/webhook', function (req, res) {
                                                 }
                                             ]
                                         }];
+
                                         await sendList(senderId, elements);
+
+                                    } else if (['game', 'phong game', 'phòng game'].includes(text.toLowerCase())) {
+
+                                        let link = 'https://lqdchatventure-web.herokuapp.com/game_rooms?id=' + senderData.data().mask_id;
+
+                                        let elements = [{
+                                            'title': 'Danh sách phòng game',
+                                            'default_action': {
+                                                'type': 'web_url',
+                                                'url': link,
+                                                'webview_height_ratio': 'full',
+                                            },
+                                            'buttons': [
+                                                {
+                                                    'type': 'web_url',
+                                                    'url': link,
+                                                    'title': 'Nhấn vào đây'
+                                                }
+                                            ]
+                                        }];
+
+                                        await sendList(senderId, elements);
+
                                     } else if (['thoát', 'thoat', 'kết thúc', 'ket thuc', 'ketthuc'].includes(text.toLowerCase())) {
 
                                         let code = await getOut(senderId, senderData);
@@ -446,9 +466,9 @@ app.post('/webhook', function (req, res) {
                                         });
 
                                         if (history_elements.length === 0) {
-                                            sendTextMessage(senderId, "Bạn hiên chưa có yêu cầu kết nối qua lịch sử từ ai cả");
+                                            await sendTextMessage(senderId, "Bạn hiên chưa có yêu cầu kết nối qua lịch sử từ ai cả");
                                         } else {
-                                            sendTextMessage(senderId, "Yêu cầu kết nối qua lịch sử cuộc trò chuyện");
+                                            await sendTextMessage(senderId, "Yêu cầu kết nối qua lịch sử cuộc trò chuyện");
                                             await sendList(senderId, history_elements);
                                         }
 
@@ -489,9 +509,9 @@ app.post('/webhook', function (req, res) {
                                         });
 
                                         if (qa_elements.length === 0) {
-                                            sendTextMessage(senderId, "Bạn hiên chưa có yêu cầu kết nối qua câu hỏi từ ai cả");
+                                            await sendTextMessage(senderId, "Bạn hiên chưa có yêu cầu kết nối qua câu hỏi từ ai cả");
                                         } else {
-                                            sendTextMessage(senderId, "Yêu cầu kết nối qua câu hỏi");
+                                            await sendTextMessage(senderId, "Yêu cầu kết nối qua câu hỏi");
                                             await sendList(senderId, qa_elements);
                                         }
 
@@ -521,7 +541,7 @@ app.post('/webhook', function (req, res) {
                                         }
 
                                         if (questIdList.length === 0) {
-                                            sendTextMessage(senderId, "Hiện không còn câu hỏi nào mà bạn chưa trả lời. Hãy đến đây " +
+                                            await sendTextMessage(senderId, "Hiện không còn câu hỏi nào mà bạn chưa trả lời. Hãy đến đây " +
                                                 "vào lúc khác")
                                         } else {
                                             let randQuestion = Math.floor(Math.random() * questIdList.length);
@@ -589,7 +609,7 @@ app.post('/webhook', function (req, res) {
                                             await sendQuickReplyQuestion(senderId, 'Bạn chưa tìm kiếm câu hỏi nào cả');
                                         } else {
                                             let questData = await getDoc(doc(db, 'questions', senderData.data().crr_question))
-                                            sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
+                                            await sendTextMessage(senderId, "Câu hỏi hiện tại : " + questData.data().text);
                                         }
                                     } else if (['block'].includes(text.toLowerCase())) {
                                         await blockFunc(senderId, senderData, senderData.data().partner);
@@ -850,7 +870,25 @@ app.post('/webhook', function (req, res) {
                                     } else {
                                         //Tin nhắn thường
 
-                                        if (senderData.data().crr_timestamp !== null) {
+                                        if (senderData.data().crr_game_room !== null && senderData.data().crr_game_room !== undefined) {
+                                            let snapshotRef = collection(db, 'game_rooms', senderData.data().crr_game_room,
+                                                'players');
+
+                                            let players = await getDocs(snapshotRef);
+
+                                            let game_nickname = senderData.data().game_nickname;
+
+                                            players.forEach((player) => {
+                                                (async () => {
+                                                    try {
+                                                        await sendTextMessage(player.data().id, game_nickname + " :\n\n" + text);
+                                                    } catch (e) {
+                                                        console.log("Error at game message:", e);
+                                                    }
+
+                                                })();
+                                            });
+                                        } else if (senderData.data().crr_timestamp !== null) {
                                             command_text = false;
                                             await sendTextMessage(senderData.data().partner, text);
 
@@ -958,7 +996,7 @@ app.post('/webhook', function (req, res) {
                                         let docSnap = await getDoc(docRef);
 
                                         if (!docSnap.exists()) {
-                                            sendTextMessage(senderId, 'Lịch sử cuộc trò chuyện này đã bị xóa bởi bạn ' +
+                                            await sendTextMessage(senderId, 'Lịch sử cuộc trò chuyện này đã bị xóa bởi bạn ' +
                                                 'hoặc đối tác');
                                             return;
                                         }
@@ -1674,7 +1712,7 @@ async function addToQueue(senderId, senderData, find_gender) {
 function checkIfParameterCmd(text) {
     let command = text.substr(0, text.indexOf(' '));
     if (command.toLowerCase() === '') {
-        // sendTextMessage(senderId, "Lệnh không hợp lệ");
+        // await sendTextMessage(senderId, "Lệnh không hợp lệ");
         return false;
 
     }
