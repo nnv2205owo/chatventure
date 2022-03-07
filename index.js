@@ -180,6 +180,7 @@ app.post('/webhook', function (req, res) {
                                             mask_id: docRef.id,
                                             qa_requesting_id: null,
                                             crr_question: null,
+                                            setup_gender: false
                                         });
 
                                         await setDoc(doc(db, 'names', profile.name + ' ' + profile.id), {
@@ -194,6 +195,11 @@ app.post('/webhook', function (req, res) {
 
                                 // Nếu người dùng gửi tin nhắn đến
                                 if (message.message.text) {
+
+                                    if (senderData.data().setup_gender === undefined || senderData.data().setup_gender) {
+                                        await sendTextMessage(senderId, "Trước khi bắt đầu sử dụng hệ thống, hãy thiết " +
+                                            "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat");
+                                    }
 
                                     var text = message.message.text;
                                     // // console.log(senderId, text);
@@ -729,6 +735,7 @@ app.post('/webhook', function (req, res) {
                                             await setDoc(doc(db, 'users', senderId), {
 
                                                 gender: set_gender,
+                                                setup_gender: true
 
                                             }, {merge: true});
 
