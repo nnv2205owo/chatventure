@@ -1627,32 +1627,32 @@ async function addToQueue(senderId, senderData, find_gender) {
         let gettedDoc = querySnapshot.docs[x];
         let gettedDocData = gettedDoc.data();
 
-        // console.log('hey ' + gettedDocData.last_connect);
+        console.log('hey ' + gettedDocData.last_connect);
 
         if (gettedDocData.exclude_last_connected === true && gettedDocData.last_connect === senderId) continue;
         if (senderData.exclude_last_connected === true && senderData.last_connect === gettedDoc.id) continue;
-        // console.log('Not last connected');
+        console.log('Not last connected');
 
-        // console.log('ayo ', gettedDocData.find_tags,
-        //     gettedDocData.id, senderData.find_tags);
+        console.log('ayo ', gettedDocData.find_tags,
+            gettedDocData.id, senderData.find_tags);
 
         if (senderData.find_tags.length !== 0) {
-            // // console.log('true1', senderData.find_tags.length);
+            console.log('true1', senderData.find_tags.length);
             if (!senderData.find_tags.some(
                 tags => gettedDocData.tags.includes(tags))) continue;
         }
 
-        // // console.log('aloha ' + senderData.find_tags);
+        console.log('aloha ' + senderData.find_tags);
 
         if (gettedDocData.find_tags.length !== 0) {
-            //// console.log('true2', gettedDocData.find_tags.length);
+            console.log('true2', gettedDocData.find_tags.length);
             if (!gettedDocData.find_tags.some(
                 tags => senderData.tags.includes(tags))) continue;
         }
 
-        // console.log('Tags match');
+        console.log('Tags match');
 
-        // console.log(gettedDocData.age_range, senderData.age_range);
+        console.log(gettedDocData.age_range, senderData.age_range);
 
         if (gettedDocData.age_range !== null) {
             if (senderData.age === null) continue;
@@ -1669,22 +1669,22 @@ async function addToQueue(senderId, senderData, find_gender) {
 
         }
 
-        // console.log('Age range match');
+        console.log('Age range match');
 
         if (senderData.find_gender !== null && senderData.find_gender !== gettedDocData.gender) continue;
         if (gettedDocData.find_gender !== null && gettedDocData.find_gender !== senderData.gender) continue;
 
-        // console.log('Gender match');
-        // console.log(senderData.find_gender, senderData.gender);
-        // console.log(gettedDocData.find_gender, gettedDocData.gender);
+        console.log('Gender match');
+        console.log(senderData.find_gender, senderData.gender);
+        console.log(gettedDocData.find_gender, gettedDocData.gender);
 
         if (senderData.blocked.includes(gettedDoc.id)) continue;
         if (gettedDocData.blocked.includes(senderId)) continue;
 
-        // console.log('Not blocked');
+        console.log('Not blocked');
 
         find = gettedDoc.id;
-        //// console.log('aloho', find);
+        console.log('aloho', find);
 
         break;
     }
