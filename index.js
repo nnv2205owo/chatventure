@@ -198,7 +198,7 @@ app.post('/webhook', function (req, res) {
 
                                     if (senderData.data().setup_gender === undefined || senderData.data().setup_gender) {
                                         await sendTextMessage(senderId, "Trước khi bắt đầu sử dụng hệ thống, hãy thiết " +
-                                            "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat");
+                                            "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat (Update trước 8/3)");
                                     }
 
                                     var text = message.message.text;
