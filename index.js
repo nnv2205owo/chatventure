@@ -2058,6 +2058,7 @@ async function getOut(senderId, senderData) {
 
 async function sendTextMessage(senderId, text) {
     try {
+        console.log(senderId);
         await bot.sendTextMessage(senderId, text);
     } catch (e) {
         console.log("Error bot.send: ", e);
