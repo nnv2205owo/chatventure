@@ -196,11 +196,6 @@ app.post('/webhook', function (req, res) {
                                 // Nếu người dùng gửi tin nhắn đến
                                 if (message.message.text) {
 
-                                    if (senderData.data().setup_gender === undefined || !senderData.data().setup_gender) {
-                                        await sendTextMessage(senderId, "Trước khi bắt đầu sử dụng hệ thống, hãy thiết " +
-                                            "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat (Update trước 8/3)");
-                                    }
-
                                     var text = message.message.text;
                                     // // console.log(senderId, text);
 
@@ -208,7 +203,10 @@ app.post('/webhook', function (req, res) {
                                         last_text: text,
                                     }, {merge: true});
 
-                                    if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem', 'bắt đầu', 'batdau', 'bat dau']
+                                    if (senderData.data().setup_gender === undefined || !senderData.data().setup_gender) {
+                                        await sendTextMessage(senderId, "Trước khi bắt đầu sử dụng hệ thống, hãy thiết " +
+                                            "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat (Update trước 8/3)");
+                                    } else if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem', 'bắt đầu', 'batdau', 'bat dau']
                                         .includes(text.toLowerCase())) {
                                         try {
                                             await addToQueue(senderId, senderData, null);
