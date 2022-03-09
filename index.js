@@ -205,7 +205,7 @@ app.post('/webhook', function (req, res) {
 
                                     if (senderData.data().setup_gender === undefined || !senderData.data().setup_gender) {
                                         await sendTextMessage(senderId, "Trước khi bắt đầu sử dụng hệ thống, hãy thiết " +
-                                            "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat (Update trước 8/3)");
+                                            "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat (Update trước 8/3) \n Ví dụ : gioitinh nu");
                                     } else if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem', 'bắt đầu', 'batdau', 'bat dau']
                                         .includes(text.toLowerCase())) {
                                         try {
@@ -1592,6 +1592,18 @@ async function connect(senderId, gettedId) {
     }, {merge: true});
 
     let docSnapNickname = await getDoc(doc(db, 'users', gettedId));
+
+    await setDoc(doc(db, 'users', gettedId, 'notifications', timestamp.toString()), {
+        text: 'Bạn đã được kết nối',
+        author: docSnap.data().nickname,
+        timestamp: timestamp
+    }, {merge: true});
+
+    await setDoc(doc(db, 'users', senderId, 'notifications', timestamp.toString()), {
+        text: 'Bạn đã được kết nối',
+        author: docSnapNickname.data().nickname,
+        timestamp: timestamp
+    }, {merge: true});
 
     await sendQueueTextMessage(gettedId, docSnapNickname.data().nickname + ' đã được kết nối và thoát khỏi phòng đợi');
     await sendTextMessage(senderId, 'Bạn đã được kết nối. Nói lời chào với người bạn mới đi nào');
