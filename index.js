@@ -229,8 +229,12 @@ app.post('/webhook', function (req, res) {
 
                                             await sendQuickReply(senderId, 'Giới tính của bạn đã được đặt là : ' + parameter);
 
+                                            return;
                                         }
-                                    } else if (senderData.data().setup_gender === undefined || !senderData.data().setup_gender) {
+
+                                    }
+
+                                    if (senderData.data().setup_gender === undefined || !senderData.data().setup_gender) {
                                         await sendTextMessage(senderId, "Trước khi bắt đầu sử dụng hệ thống, hãy thiết " +
                                             "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat (Update trước 8/3) \n Ví dụ : gioitinh nu");
                                     } else if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem', 'bắt đầu', 'batdau', 'bat dau']
@@ -702,7 +706,7 @@ app.post('/webhook', function (req, res) {
                                         var command = text.substr(0, text.indexOf(' '));
                                         var parameter = text.substr(text.indexOf(' ') + 1);
 
-                                        // // console.log(command, parameter);
+                                        console.log(command, parameter);
 
                                         if (command.toLowerCase() === '-admin-global' && (senderId === '4007404939324313' || senderId === '5654724101269283')) {
                                             let all = query(collection(db, 'users'));
