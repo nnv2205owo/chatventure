@@ -706,7 +706,7 @@ app.post('/webhook', function (req, res) {
                                         var command = text.substr(0, text.indexOf(' '));
                                         var parameter = text.substr(text.indexOf(' ') + 1);
 
-                                        console.log(command, parameter);
+                                        // console.log(command, parameter);
 
                                         if (command.toLowerCase() === '-admin-global' && (senderId === '4007404939324313' || senderId === '5654724101269283')) {
                                             let all = query(collection(db, 'users'));
