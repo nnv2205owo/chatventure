@@ -203,7 +203,34 @@ app.post('/webhook', function (req, res) {
                                         last_text: text,
                                     }, {merge: true});
 
-                                    if (senderData.data().setup_gender === undefined || !senderData.data().setup_gender) {
+                                    if (checkIfParameterCmd(text)) {
+                                        let command = text.substr(0, text.indexOf(' '));
+                                        let parameter = text.substr(text.indexOf(' ') + 1);
+
+                                        if (command.toLowerCase() === 'gioitinh') {
+
+                                            if (parameter !== 'nam' && parameter !== 'nu' && parameter !== 'khongdat') {
+                                                await sendQuickReplyGender(senderId, 'Giới tính không hợp lệ. Các giới tính có thể' +
+                                                    ' đặt : nam | nu | khongdat');
+                                                return;
+                                            }
+
+                                            let set_gender;
+                                            if (parameter === 'nam') set_gender = 'male';
+                                            else if (parameter === 'nu') set_gender = 'female';
+                                            else set_gender = null;
+
+                                            await setDoc(doc(db, 'users', senderId), {
+
+                                                gender: set_gender,
+                                                setup_gender: true
+
+                                            }, {merge: true});
+
+                                            await sendQuickReply(senderId, 'Giới tính của bạn đã được đặt là : ' + parameter);
+
+                                        }
+                                    } else if (senderData.data().setup_gender === undefined || !senderData.data().setup_gender) {
                                         await sendTextMessage(senderId, "Trước khi bắt đầu sử dụng hệ thống, hãy thiết " +
                                             "lập giới tính của bản thân trước bằng cú pháp gioitinh + nam / nu / khongdat (Update trước 8/3) \n Ví dụ : gioitinh nu");
                                     } else if (['ketnoi', 'timkiem', 'kết nối', 'tìm kiếm', 'ket noi', 'tim kiem', 'bắt đầu', 'batdau', 'bat dau']
